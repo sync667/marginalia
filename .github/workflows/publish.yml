@@ -1,0 +1,56 @@
+name: publish
+
+# Publishes to npm when a GitHub release is published. Authentication uses npm
+# trusted publishing (OIDC) — there is no NPM_TOKEN secret. The trust
+# relationship is configured on npmjs.com under the package's Settings tab and
+# must name this exact workflow filename (publish.yml).
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for OIDC — without it npm cannot verify the run
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing needs a recent npm CLI; the one bundled with Node 20
+      # predates OIDC support.
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
+      - name: Refuse to publish if the tag and package.json disagree
+        if: github.event_name == 'release'
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg=$(node -p "require('./package.json').version")
+          echo "tag=$tag package.json=$pkg"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $pkg"
+            exit 1
+          fi
+
+      - name: Smoke-test the tarball before publishing
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/consumer" && cd "$RUNNER_TEMP/consumer"
+          npm init -y >/dev/null
+          npm install "$RUNNER_TEMP"/sync667-marginalia-*.tgz
+          mkdir -p d && printf '# Hi\n\nbody\n' > d/a.md
+          ./node_modules/.bin/marginalia --docs-dir d --output out.html --no-open
+          grep -q "Marginalia" out.html
+
+      - name: Publish
+        run: npm publish --access public
+        # No NODE_AUTH_TOKEN here on purpose. An empty value still counts as a
+        # value and npm would use it instead of falling back to OIDC.
