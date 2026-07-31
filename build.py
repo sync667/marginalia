@@ -293,6 +293,8 @@ def open_in_browser(path: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
+        # Set by the npm wrapper so `--help` reads `marginalia`, not `build.py`.
+        prog=os.environ.get("MARGINALIA_PROG") or None,
         description="Generate a self-contained Marginalia review page from project markdown docs.",
     )
     parser.add_argument(

@@ -1,6 +1,10 @@
 # Vendor cache (generated on first --offline build)
 vendor/
 
+# npm
+node_modules/
+*.tgz
+
 # Python
 __pycache__/
 *.py[cod]

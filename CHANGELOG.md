@@ -7,6 +7,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [0.1.0] — Initial public release
 
 ### Added
+- **npm package** — published as [`@sync667/marginalia`](https://www.npmjs.com/package/@sync667/marginalia). `npx @sync667/marginalia --docs-dir docs` runs the generator with no clone and no agent. A Node wrapper locates a local Python 3.9+ and forwards all arguments to `build.py`; it prints install guidance if no suitable interpreter is found.
+- **Brand logo** — `assets/logo.svg` used for the README, the app header, and the generated page's favicon.
 - **Claude Code plugin packaging** — `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json` make the repo a self-hosting one-plugin marketplace. Install with `/plugin marketplace add sync667/marginalia` then `/plugin install marginalia@marginalia`. Still works as a plain `.claude/skills/` clone or as a standalone script.
 - Bundle any number of markdown directories into a single self-contained HTML review page (`build.py --docs-dir` repeatable, or `--auto`).
 - Reader with 3-column layout: file tree · rendered markdown · comment thread.

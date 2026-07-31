@@ -136,6 +136,8 @@ Marginalia is a plain [Agent Skill](https://agentskills.io/specification) — a 
 npx skills add sync667/marginalia
 ```
 
+> **This does not install anything from npm.** `skills` is a third-party CLI published by Vercel; `npx` fetches *that* tool, which then clones **this GitHub repo** into your agent's skills directory. `sync667/marginalia` here is a GitHub `owner/repo` coordinate, not an npm package name.
+
 It detects the agents on your machine and drops the skill in the right place. Or clone it yourself:
 
 ```bash
@@ -160,9 +162,31 @@ Layout after cloning:
 
 The directory must be named `marginalia` to match the `name:` in the frontmatter, per the spec.
 
-### Standalone (no agent at all)
+### Standalone CLI, via npm
 
-The generator is a plain script. Clone anywhere and run it:
+If you just want the tool and no agent at all, the generator is published to npm as **[`@sync667/marginalia`](https://www.npmjs.com/package/@sync667/marginalia)**. No install needed:
+
+```bash
+npx @sync667/marginalia --docs-dir docs --output review.html
+```
+
+Or install it properly:
+
+```bash
+npm install -g @sync667/marginalia
+marginalia --docs-dir docs
+```
+
+> **Requires Python 3.9+ on your machine.** The npm package is a thin Node wrapper around `build.py`; the actual work is done by a stdlib-only Python script, so there is nothing to `pip install`, but you do need an interpreter. The wrapper finds `py`/`python`/`python3` automatically and tells you what to install if it can't.
+
+Don't confuse the two npm commands:
+
+| Command | Fetches from npm | What it does |
+| :-- | :-- | :-- |
+| `npx skills add sync667/marginalia` | Vercel's `skills` CLI | Installs the **skill** into your agent, from GitHub |
+| `npx @sync667/marginalia` | **this project** | Runs the **generator** directly, no agent involved |
+
+### Standalone, from a clone
 
 ```bash
 git clone https://github.com/sync667/marginalia && cd marginalia

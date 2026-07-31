@@ -62,5 +62,9 @@ Include:
 - Match existing code style (vanilla JS, no build step, small deps).
 - If you add a UI element, add it to `README.md` and to the in-app help modal.
 - If you change the export JSON schema, bump the `schema` field in `template.html` and note it in `CHANGELOG.md`.
-- Releases pin a version: bump `version` in **both** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` (and `metadata.version` in `SKILL.md`), or Claude Code users won't receive the update.
+- Releases pin a version in **four** places — bump them together or installs drift apart:
+  1. `.claude-plugin/plugin.json` → `version`
+  2. `.claude-plugin/marketplace.json` → the plugin entry's `version`
+  3. `SKILL.md` → `metadata.version`
+  4. `package.json` → `version` (npm)
 - Test in Chrome + Firefox at minimum. Report if a feature is Chrome-only (e.g. File System Access API).

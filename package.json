@@ -1,0 +1,46 @@
+{
+  "name": "@sync667/marginalia",
+  "version": "0.1.0",
+  "description": "Turn any project's markdown docs into a self-contained web review tool — highlight passages, add inline comments, hand the batch back to your AI agent as structured JSON.",
+  "keywords": [
+    "markdown",
+    "documentation",
+    "review",
+    "annotations",
+    "comments",
+    "docs",
+    "agent-skill",
+    "claude-code"
+  ],
+  "homepage": "https://github.com/sync667/marginalia#readme",
+  "bugs": {
+    "url": "https://github.com/sync667/marginalia/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sync667/marginalia.git"
+  },
+  "license": "MIT",
+  "author": "sync667 (https://github.com/sync667)",
+  "type": "commonjs",
+  "bin": {
+    "marginalia": "bin/marginalia.js"
+  },
+  "files": [
+    "bin/",
+    "build.py",
+    "template.html",
+    "SKILL.md",
+    "assets/logo.svg",
+    "assets/logo-256.png"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node bin/marginalia.js --help"
+  }
+}

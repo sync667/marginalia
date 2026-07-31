@@ -84,6 +84,44 @@ jobs:
       - name: Build (auto mode)
         run: python build.py --auto --output out-auto.html --project-name test --no-open
 
+  npm-package:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Pack and install the tarball
+        shell: bash
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/consumer" && cd "$RUNNER_TEMP/consumer"
+          npm init -y >/dev/null
+          npm install "$RUNNER_TEMP"/sync667-marginalia-*.tgz
+      - name: Run the installed binary
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP/consumer"
+          mkdir -p sampledocs
+          printf '# Hello\n\nA doc to review.\n' > sampledocs/intro.md
+          ./node_modules/.bin/marginalia --docs-dir sampledocs --output out.html --no-open
+          test -s out.html
+          grep -q "Marginalia" out.html
+          grep -q "A doc to review" out.html
+      - name: Version must match the plugin manifest
+        shell: bash
+        run: |
+          npm_v=$(node -p "require('./package.json').version")
+          plug_v=$(node -p "require('./.claude-plugin/plugin.json').version")
+          echo "npm=$npm_v plugin=$plug_v"
+          test "$npm_v" = "$plug_v"
+
   plugin-manifest:
     runs-on: ubuntu-latest
     steps:
