@@ -1,7 +1,13 @@
-# marginalia
+<p align="center">
+  <img src="assets/logo.svg" alt="Marginalia" width="128" height="128">
+</p>
 
-[![ci](https://github.com/sync667/marginalia/actions/workflows/ci.yml/badge.svg)](https://github.com/sync667/marginalia/actions/workflows/ci.yml)
-[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<h1 align="center">marginalia</h1>
+
+<p align="center">
+  <a href="https://github.com/sync667/marginalia/actions/workflows/ci.yml"><img src="https://github.com/sync667/marginalia/actions/workflows/ci.yml/badge.svg" alt="ci"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license: MIT"></a>
+</p>
 
 > _mar·gi·na·lia_ · marginal notes; annotations written in the margins of a manuscript.
 

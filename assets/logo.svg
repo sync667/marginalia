@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Marginalia">
+  <title>Marginalia</title>
+  <rect width="512" height="512" rx="112" fill="#111E2E"/>
+  <g fill="none" stroke="#FCF8F1" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M124 93 H256 L322 157 V368a40 40 0 0 1-40 40H124a40 40 0 0 1-40-40V133a40 40 0 0 1 40-40Z"/>
+    <path d="M256 93 V117a40 40 0 0 0 40 40h26"/>
+  </g>
+  <g fill="#FCF8F1">
+    <rect x="120" y="184" width="158" height="12" rx="6"/>
+    <rect x="120" y="219" width="158" height="12" rx="6"/>
+    <rect x="120" y="296" width="158" height="12" rx="6"/>
+    <rect x="120" y="333" width="158" height="12" rx="6"/>
+  </g>
+  <rect x="120" y="253" width="158" height="20" rx="10" fill="#F5B743"/>
+  <path d="M413 238a16 16 0 0 1 16 16v20a16 16 0 0 1-16 16h-31l-22 19v-19a16 16 0 0 1-16-16v-20a16 16 0 0 1 16-16Z"
+        fill="none" stroke="#F5B743" stroke-width="14" stroke-linejoin="round"/>
+</svg>
