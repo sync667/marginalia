@@ -1,0 +1,32 @@
+{
+  "schema": "doc-reviewer.v1",
+  "project": "SampleProject",
+  "docs_dir": "docs",
+  "generated_at": "2026-07-31T12:00:00.000Z",
+  "generator_session_id": "abc123def456",
+  "file_count": 3,
+  "comments": [
+    {
+      "id": "c_abc001",
+      "doc_path": "docs/README.md",
+      "quote": "Turns raw signals into a graded, evidence-backed, time-aware status",
+      "context_before": "The signature feature of the platform. ",
+      "context_after": ". It never says \"legal.\"",
+      "comment": "Consider adding a worked numerical example here — reader will want to see how the weighted sum + decay actually plays out.",
+      "created_at": "2026-07-31T11:45:00.000Z",
+      "updated_at": "2026-07-31T11:45:00.000Z",
+      "status": "open"
+    },
+    {
+      "id": "c_abc002",
+      "doc_path": "docs/subsystems/01-auth.md",
+      "quote": "Argon2id with parameters t=3, m=65536 KiB, p=1",
+      "context_before": "Decision. ",
+      "context_after": ". Peppered with a server-side secret.",
+      "comment": "OWASP now recommends m=47104 minimum. Verify our tuning still exceeds their floor.",
+      "created_at": "2026-07-31T11:50:00.000Z",
+      "updated_at": "2026-07-31T11:52:00.000Z",
+      "status": "open"
+    }
+  ]
+}

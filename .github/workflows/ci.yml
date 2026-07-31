@@ -1,0 +1,97 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-smoke-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.9", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create fixture docs
+        shell: bash
+        run: |
+          mkdir -p test-docs/subsystems
+          cat > test-docs/README.md <<'EOF'
+          # Test project
+
+          Hello from a fixture.
+
+          - [Spec 01](subsystems/01-alpha.md)
+          - [Spec 02](subsystems/02-beta.md)
+          EOF
+          cat > test-docs/subsystems/01-alpha.md <<'EOF'
+          # 01 — Alpha
+
+          Table:
+
+          | a | b |
+          |---|---|
+          | 1 | 2 |
+
+          ```python
+          print("hello")
+          ```
+          EOF
+          cat > test-docs/subsystems/02-beta.md <<'EOF'
+          # 02 — Beta
+
+          Cross-ref to [01](01-alpha.md).
+          EOF
+
+      - name: Build (online mode)
+        run: python build.py --docs-dir test-docs --output out.html --project-name test --no-open
+
+      - name: Sanity check output
+        shell: bash
+        run: |
+          test -s out.html
+          grep -q "Marginalia" out.html
+          grep -q "01 — Alpha" out.html
+          grep -q "02 — Beta" out.html
+          # window.__DOCS__ should exist and be non-trivial
+          grep -q "window.__DOCS__" out.html
+
+      - name: Build (offline mode)
+        run: python build.py --docs-dir test-docs --output out-offline.html --project-name test --offline --no-open
+
+      - name: Offline output has inlined libs
+        shell: bash
+        run: |
+          test -s out-offline.html
+          grep -q "marked" out-offline.html
+          grep -q "hljs" out-offline.html
+          # No CDN link when offline
+          if grep -q "cdnjs.cloudflare.com/ajax/libs/marked" out-offline.html; then
+            echo "ERROR: offline build still references cdnjs"; exit 1
+          fi
+
+      - name: Build (auto mode)
+        run: python build.py --auto --output out-auto.html --project-name test --no-open
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint build.py
+        run: ruff check build.py --select=E,W,F,B --ignore=E501,B008

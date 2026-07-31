@@ -1,0 +1,28 @@
+# Vendor cache (generated on first --offline build)
+vendor/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Build output samples (regeneratable)
+*.marginalia.html
+example-output/
+
+# Local settings
+.env
+.env.local

@@ -1,0 +1,2286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Marginalia</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23ff7a3c'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='20' fill='%230d1117'%3EM%3C/text%3E%3C/svg%3E" />
+__HEAD_ASSETS__
+
+<style>
+  :root {
+    color-scheme: dark;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0d1117;
+    --bg-elev: #161b22;
+    --bg-hover: #21262d;
+    --bg-active: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-muted: #6e7681;
+    --border: #30363d;
+    --border-subtle: #21262d;
+    --accent: #ff7a3c;
+    --accent-hover: #ff8f57;
+    --accent-fg: #0d1117;
+    --link: #58a6ff;
+    --link-hover: #79b8ff;
+    --code-bg: #161b22;
+    --code-inline-bg: #262c36;
+    --highlight: #f7c948;
+    --mark-bg: rgba(247, 201, 72, 0.22);
+    --mark-bg-focus: rgba(247, 201, 72, 0.45);
+    --mark-border: rgba(247, 201, 72, 0.7);
+    --danger: #f85149;
+    --success: #3fb950;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --bg-elev: #f6f8fa;
+    --bg-hover: #eaeef2;
+    --bg-active: #d8dee4;
+    --text: #1f2328;
+    --text-dim: #57606a;
+    --text-muted: #6e7781;
+    --border: #d0d7de;
+    --border-subtle: #eaeef2;
+    --accent: #d94f1a;
+    --accent-hover: #b53f10;
+    --accent-fg: #ffffff;
+    --link: #0969da;
+    --link-hover: #0550ae;
+    --code-bg: #f6f8fa;
+    --code-inline-bg: #eaeef2;
+    --highlight: #bf8700;
+    --mark-bg: rgba(255, 235, 59, 0.5);
+    --mark-bg-focus: rgba(255, 209, 0, 0.9);
+    --mark-border: rgba(191, 135, 0, 0.7);
+    --danger: #cf222e;
+    --success: #1a7f37;
+    --shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter",
+      "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { color: var(--link-hover); text-decoration: underline; }
+  ::selection { background: rgba(255, 122, 60, 0.35); }
+
+  /* ---- Layout ---- */
+  .app {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr) 380px;
+    grid-template-rows: 52px 1fr;
+    grid-template-areas:
+      "header header header"
+      "sidebar reader comments";
+    height: 100vh;
+  }
+  @media (max-width: 1200px) {
+    .app { grid-template-columns: 260px minmax(0, 1fr) 320px; }
+  }
+  @media (max-width: 960px) {
+    .app { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: "header header" "sidebar reader"; }
+    .comments { display: none; }
+  }
+
+  /* ---- Header ---- */
+  .header {
+    grid-area: header;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    z-index: 10;
+  }
+  .brand {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .brand-mark {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    text-align: center;
+    line-height: 22px;
+    font-weight: 700;
+    font-size: 12px;
+    transform: translateY(3px);
+  }
+  .project {
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .live-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(63, 185, 80, 0.15);
+    color: var(--success);
+    animation: livePulse 1.8s ease-in-out infinite;
+  }
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+  }
+  .help-content {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .help-content h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .help-content h3:first-child { margin-top: 0; }
+  .help-content p { margin: 6px 0; color: var(--text-dim); }
+  .help-content ul { margin: 6px 0; padding-left: 20px; color: var(--text-dim); }
+  .help-content li { margin: 2px 0; }
+  .help-content strong { color: var(--text); }
+  .help-content code {
+    background: var(--code-inline-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+  .help-shortcuts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 14px;
+    margin: 8px 0;
+  }
+  .help-shortcuts .kbd-group {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    color: var(--text-dim);
+  }
+  .search-wrap { position: relative; flex: 1; max-width: 520px; margin: 0 auto; }
+  .search {
+    width: 100%;
+    padding: 6px 12px 6px 32px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    outline: none;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .search:focus { border-color: var(--accent); }
+  .search-wrap::before {
+    content: "🔍";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.6;
+    font-size: 12px;
+  }
+  .header-actions { display: flex; gap: 6px; align-items: center; }
+  .icon-btn, .btn {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .icon-btn:hover, .btn:hover { background: var(--bg-hover); border-color: var(--text-muted); }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn-ghost { border-color: transparent; }
+  .btn-danger { color: var(--danger); border-color: transparent; }
+  .btn-danger:hover { background: rgba(248, 81, 73, 0.1); }
+  .stats {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- Sidebar ---- */
+  .sidebar {
+    grid-area: sidebar;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .sidebar-header {
+    padding: 12px 14px 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .sidebar-section-label {
+    padding: 12px 14px 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 600;
+    background: var(--bg-elev);
+  }
+  .doc-list { list-style: none; padding: 0; margin: 0 0 16px 0; }
+  .doc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 13px;
+    border-left: 2px solid transparent;
+    transition: background 0.1s;
+    line-height: 1.35;
+    word-break: break-word;
+  }
+  .doc-item:hover { background: var(--bg-hover); }
+  .doc-item.active { background: var(--bg-hover); border-left-color: var(--accent); }
+  .doc-item .doc-meta { color: var(--text-muted); font-size: 11px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .doc-item .doc-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .doc-item .comment-badge {
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 600;
+    font-size: 10px;
+    padding: 0 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  @media (max-width: 960px) {
+    .sidebar { padding-top: 12px; }
+    .sidebar-header, .sidebar-section-label { display: none; }
+    .doc-item { padding: 8px; font-size: 0; }
+    .doc-item .doc-name::first-letter { font-size: 14px; font-weight: 700; }
+    .doc-meta, .comment-badge { display: none; }
+  }
+
+  /* ---- Reader ---- */
+  .reader {
+    grid-area: reader;
+    overflow-y: auto;
+    background: var(--bg);
+    scroll-behavior: smooth;
+  }
+  .reader-inner {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 40px 200px;
+  }
+  .reader-placeholder {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 40px;
+  }
+  .reader-placeholder h2 { font-weight: 500; margin-bottom: 12px; }
+
+  .reader-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .reader-title-block { min-width: 0; }
+  .reader-path {
+    color: var(--text-muted);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .reader-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .reader-meta {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .reader-meta-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .reader-actions { display: flex; gap: 6px; }
+
+  /* Editor */
+  .editor {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .editor-toolbar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 8px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .editor-toolbar .spacer { flex: 1; }
+  .editor-status {
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 0 8px;
+  }
+  .editor-status.dirty { color: var(--accent); font-weight: 600; }
+  .editor-textarea {
+    width: 100%;
+    min-height: 62vh;
+    padding: 16px 18px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    resize: vertical;
+    outline: none;
+    tab-size: 2;
+    -moz-tab-size: 2;
+  }
+  .editor-textarea:focus { border-color: var(--accent); }
+  .editor-preview {
+    padding: 16px 18px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: var(--bg-elev);
+    min-height: 200px;
+  }
+
+  /* Markdown body */
+  .markdown { color: var(--text); }
+  .markdown h1, .markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 {
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 1.6em 0 0.6em;
+    scroll-margin-top: 20px;
+    transition: background-color 0.4s;
+  }
+  .markdown .heading-flash {
+    background-color: var(--mark-bg-focus);
+    border-radius: 4px;
+  }
+  .markdown h1 { font-size: 1.8em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.3em; }
+  .markdown h2 { font-size: 1.45em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.25em; }
+  .markdown h3 { font-size: 1.2em; }
+  .markdown h4 { font-size: 1.05em; }
+  .markdown h5 { font-size: 0.95em; color: var(--text-dim); }
+  .markdown p, .markdown ul, .markdown ol { margin: 0.7em 0; }
+  .markdown ul, .markdown ol { padding-left: 1.8em; }
+  .markdown li > p { margin: 0.3em 0; }
+  .markdown li + li { margin-top: 0.15em; }
+  .markdown blockquote {
+    margin: 0.8em 0;
+    padding: 0.4em 1em;
+    border-left: 3px solid var(--border);
+    color: var(--text-dim);
+    background: var(--bg-elev);
+    border-radius: 0 6px 6px 0;
+  }
+  .markdown code {
+    background: var(--code-inline-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+  }
+  .markdown pre {
+    background: var(--code-bg) !important;
+    border: 1px solid var(--border-subtle);
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1em 0;
+    font-size: 0.85em;
+    line-height: 1.5;
+  }
+  .markdown pre code {
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+  }
+  .markdown table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+    font-size: 0.92em;
+  }
+  .markdown table th, .markdown table td {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .markdown table th { background: var(--bg-elev); font-weight: 600; }
+  .markdown table tr:nth-child(even) td { background: var(--bg-elev); }
+  .markdown hr { border: 0; height: 1px; background: var(--border); margin: 2em 0; }
+  .markdown img { max-width: 100%; border-radius: 6px; }
+  .markdown a { text-decoration: none; border-bottom: 1px dotted var(--link); }
+  .markdown a:hover { border-bottom-style: solid; }
+  .markdown del { color: var(--text-muted); }
+  .markdown strong { color: var(--text); font-weight: 600; }
+
+  /* Comment highlights */
+  .markdown mark.comment-mark {
+    background: var(--mark-bg);
+    color: inherit;
+    padding: 1px 0;
+    border-bottom: 1px solid var(--mark-border);
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 2px;
+  }
+  .markdown mark.comment-mark:hover,
+  .markdown mark.comment-mark.focus {
+    background: var(--mark-bg-focus);
+  }
+  .markdown mark.comment-mark.status-resolved {
+    background: rgba(63, 185, 80, 0.15);
+    border-bottom-color: rgba(63, 185, 80, 0.5);
+    text-decoration: line-through;
+    text-decoration-color: rgba(63, 185, 80, 0.5);
+  }
+  .markdown mark.comment-mark.status-dismissed {
+    background: transparent;
+    border-bottom-color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  /* ---- Comments panel ---- */
+  .comments {
+    grid-area: comments;
+    background: var(--bg-elev);
+    border-left: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .comments-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .comments-title { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .comments-count {
+    background: var(--bg-active);
+    color: var(--text-dim);
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .comments-tabs { display: flex; gap: 2px; padding: 6px 16px 0; }
+  .comments-tab {
+    padding: 6px 10px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  .comments-tab:hover { background: var(--bg-hover); color: var(--text); }
+  .comments-tab.active { background: var(--bg-hover); color: var(--text); font-weight: 500; }
+  .comments-scroll { flex: 1; overflow-y: auto; padding: 4px 12px 24px; }
+  .comments-empty {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  .comments-empty small { opacity: 0.75; }
+
+  .comment-card {
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .comment-card.focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .comment-card.status-resolved { opacity: 0.65; }
+  .comment-card.status-dismissed { opacity: 0.5; }
+  .comment-card-quote {
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 6px 8px;
+    background: var(--bg-elev);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .comment-card-quote:hover { color: var(--text); }
+  .comment-card-doc {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    transition: text-decoration-color 0.1s;
+  }
+  .comment-card-doc:hover { text-decoration-color: currentColor; color: var(--link); }
+  .comment-card-body {
+    font-size: 13px;
+    color: var(--text);
+    white-space: pre-wrap;
+    line-height: 1.45;
+  }
+  .comment-card-body[contenteditable="true"] {
+    outline: 1px solid var(--accent);
+    background: var(--bg);
+    border-radius: 4px;
+    padding: 4px 6px;
+  }
+  .comment-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .comment-card-footer .spacer { flex: 1; }
+  .comment-status-chip {
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .status-open   { background: rgba(255, 122, 60, 0.15); color: var(--accent); }
+  .status-resolved  { background: rgba(63, 185, 80, 0.15); color: var(--success); }
+  .status-dismissed { background: rgba(139, 148, 158, 0.15); color: var(--text-muted); }
+
+  /* ---- Add-comment popover ---- */
+  .popover {
+    position: fixed;
+    z-index: 100;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 4px;
+    display: flex;
+    gap: 2px;
+    transform: translate(-50%, -100%) translateY(-8px);
+    pointer-events: auto;
+  }
+  .popover button {
+    background: transparent;
+    color: var(--text);
+    border: 0;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .popover button:hover { background: var(--bg-hover); }
+  .popover button.primary { color: var(--accent); font-weight: 600; }
+
+  /* ---- Modal ---- */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal {
+    width: 100%;
+    max-width: 560px;
+    max-height: 80vh;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-title { font-weight: 600; font-size: 14px; }
+  .modal-close { background: transparent; border: 0; color: var(--text-dim); cursor: pointer; padding: 4px; font-size: 18px; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
+  .modal-quote {
+    background: var(--bg-elev);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    color: var(--text-dim);
+    font-size: 13px;
+    max-height: 140px;
+    overflow-y: auto;
+    line-height: 1.4;
+  }
+  .modal textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+  }
+  .modal textarea:focus { border-color: var(--accent); }
+  .modal-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-elev);
+  }
+  .modal-hint { color: var(--text-muted); font-size: 11px; }
+  .modal-actions { display: flex; gap: 8px; }
+
+  /* Export dialog */
+  .export-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+  .export-tab {
+    padding: 4px 10px;
+    background: var(--bg-elev);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .export-tab.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+  .export-content {
+    background: var(--code-bg);
+    padding: 12px;
+    border-radius: 6px;
+    max-height: 320px;
+    overflow: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.45;
+    border: 1px solid var(--border);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elev);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    z-index: 2000;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    animation: toastIn 0.15s ease-out;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translate(-50%, 6px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+
+  /* Utility */
+  .kbd {
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text-dim);
+  }
+  [hidden] { display: none !important; }
+
+  /* Scrollbars */
+  * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; border: 2px solid var(--bg); }
+  *::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="brand">
+      <span class="brand-mark">M</span>
+      <span>Marginalia</span>
+      <span class="project" id="project-name"></span>
+      <span class="live-badge" id="live-badge" hidden title="Live mode: reading docs directly from disk">● LIVE</span>
+    </div>
+    <div class="search-wrap">
+      <input class="search" id="search" placeholder="Search docs and content…  (Ctrl+K)" spellcheck="false" />
+    </div>
+    <div class="header-actions">
+      <span class="stats" id="stats"></span>
+      <button class="icon-btn" id="live-btn" title="Connect to docs folder (live mode)">🔗</button>
+      <button class="icon-btn" id="refresh-btn" title="Refresh docs (Ctrl+R)">↻</button>
+      <button class="icon-btn" id="help-btn" title="Help & shortcuts (?)">?</button>
+      <button class="icon-btn" id="theme-toggle" title="Toggle theme">🌙</button>
+      <button class="btn btn-primary" id="export-btn">Export</button>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">Documents</div>
+    <ul class="doc-list" id="doc-list"></ul>
+  </aside>
+
+  <main class="reader" id="reader">
+    <div class="reader-placeholder" id="reader-placeholder">
+      <div>
+        <h2>Select a document</h2>
+        <p style="color: var(--text-muted); max-width: 400px;">
+          Pick a document from the sidebar. Select any passage in the text to
+          add a review comment; comments are saved to your browser and can be
+          exported when you're done.
+        </p>
+      </div>
+    </div>
+    <article class="reader-inner" id="reader-inner" hidden>
+      <div class="reader-toolbar">
+        <div class="reader-title-block">
+          <div class="reader-path" id="reader-path"></div>
+          <div class="reader-title" id="reader-title"></div>
+        </div>
+        <div class="reader-meta-block">
+          <div class="reader-meta" id="reader-meta"></div>
+          <div class="reader-actions">
+            <button class="icon-btn" id="edit-btn" title="Edit this doc (Ctrl+E)">✎ Edit</button>
+          </div>
+        </div>
+      </div>
+      <div class="markdown" id="markdown"></div>
+      <div class="editor" id="editor" hidden>
+        <div class="editor-toolbar">
+          <button class="icon-btn" id="editor-preview-toggle" title="Toggle preview">👁 Preview</button>
+          <span class="editor-status" id="editor-status"></span>
+          <span class="spacer"></span>
+          <button class="btn" id="editor-cancel">Cancel</button>
+          <button class="btn btn-primary" id="editor-save" title="Save (Ctrl+S)">💾 Save</button>
+        </div>
+        <textarea class="editor-textarea" id="editor-textarea" spellcheck="false" placeholder="# Your markdown here…"></textarea>
+        <div class="editor-preview markdown" id="editor-preview" hidden></div>
+      </div>
+    </article>
+  </main>
+
+  <aside class="comments">
+    <div class="comments-header">
+      <span class="comments-title">Comments <span class="comments-count" id="comments-count">0</span></span>
+      <button class="icon-btn btn-ghost" id="clear-btn" title="Clear all comments">🗑</button>
+    </div>
+    <div class="comments-tabs" role="tablist">
+      <div class="comments-tab active" data-scope="doc">This doc</div>
+      <div class="comments-tab" data-scope="all">All docs</div>
+      <div class="comments-tab" data-scope="open">Open</div>
+    </div>
+    <div class="comments-scroll" id="comments-scroll"></div>
+  </aside>
+</div>
+
+<!-- Add-comment popover -->
+<div class="popover" id="popover" hidden>
+  <button id="popover-add" class="primary">💬 Add comment</button>
+</div>
+
+<!-- Add-comment modal -->
+<div class="modal-backdrop" id="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title">New comment</div>
+      <button class="modal-close" id="modal-close" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-quote" id="modal-quote"></div>
+      <textarea id="modal-textarea" placeholder="Write your review comment…" autofocus></textarea>
+    </div>
+    <div class="modal-footer">
+      <span class="modal-hint"><span class="kbd">Esc</span> cancel · <span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> save</span>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="modal-save">Save comment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Help modal -->
+<div class="modal-backdrop" id="help-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" style="max-width: 640px;">
+    <div class="modal-header">
+      <div class="modal-title">Marginalia — quick guide</div>
+      <button class="modal-close" id="help-close" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="help-content">
+        <h3>What this tool is for</h3>
+        <p>Read your project's markdown docs in one place, mark passages
+          you want to review, add inline comments, and export the whole
+          batch of notes back to Claude for follow-up.</p>
+
+        <h3>Add a comment</h3>
+        <ol style="color: var(--text-dim); padding-left: 20px;">
+          <li>Open a doc from the left sidebar.</li>
+          <li><strong>Select any passage</strong> (at least a few words) in the reader.</li>
+          <li>A floating <strong>💬 Add comment</strong> button appears near the cursor.</li>
+          <li>Click it, type your note, save. The passage is highlighted; the card lands in the right sidebar.</li>
+        </ol>
+
+        <h3>Export &amp; send to Claude</h3>
+        <ul>
+          <li>Hit <strong>Export</strong> (top right or <span class="kbd">Ctrl</span>+<span class="kbd">S</span>).</li>
+          <li>Choose <strong>JSON</strong> (structured for the AI) or <strong>Markdown</strong> (human-readable).</li>
+          <li><strong>Copy</strong> to clipboard, or <strong>Download</strong> the file, or use <strong>Save to project</strong> (writes
+            directly to <code>.claude/scratchpad/</code> if you granted folder access — Claude then reads it without a paste step).</li>
+          <li>Or: if you have <strong>Chrome DevTools MCP</strong> connected, just tell Claude "read my Marginalia comments" — it can grab them from the tab's <code>localStorage</code> directly.</li>
+        </ul>
+
+        <h3>Live mode &amp; refresh</h3>
+        <ul>
+          <li><strong>↻ Refresh</strong> button reloads the doc bundle (comments are preserved via <code>localStorage</code>).</li>
+          <li><strong>🔗 Connect</strong> to a docs folder to switch on <strong>Live mode</strong>. The page then reads
+            <code>.md</code> files directly from disk, so <strong>refresh always shows the current file contents</strong>.
+            Uses the File System Access API (Chrome / Edge; other browsers stay on bundled mode).</li>
+          <li>Rebuild the HTML from scratch by re-running the skill (or <code>python .claude/skills/marginalia/build.py</code>).</li>
+        </ul>
+
+        <h3>Comment lifecycle</h3>
+        <ul>
+          <li><strong>✎</strong> edit inline · <strong>✓</strong> mark resolved · <strong>⊘</strong> dismiss · <strong>↺</strong> reopen · <strong>🗑</strong> delete.</li>
+          <li>Filter tabs: <strong>This doc</strong> / <strong>All docs</strong> / <strong>Open</strong>.</li>
+          <li>Click any comment's quote in the right sidebar to jump to it in the reader.</li>
+        </ul>
+
+        <h3>Keyboard shortcuts</h3>
+        <div class="help-shortcuts">
+          <span class="kbd-group"><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span>+<span class="kbd">K</span></span>
+          <span>Focus search</span>
+          <span class="kbd-group"><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span>+<span class="kbd">S</span></span>
+          <span>Open export dialog</span>
+          <span class="kbd-group"><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span>+<span class="kbd">R</span></span>
+          <span>Refresh docs (in Live mode)</span>
+          <span class="kbd-group"><span class="kbd">?</span></span>
+          <span>Open this help</span>
+          <span class="kbd-group"><span class="kbd">Esc</span></span>
+          <span>Close modal / dismiss popover</span>
+          <span class="kbd-group"><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span>+<span class="kbd">Enter</span></span>
+          <span>Save comment (inside modal)</span>
+        </div>
+
+        <h3>Privacy</h3>
+        <p>Nothing is uploaded. Comments live in your browser's
+          <code>localStorage</code>, keyed by a hash of the docs directory
+          path so switching projects gives you a fresh workspace.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span class="modal-hint">Marginalia — self-contained review tool for markdown docs.</span>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="help-ok">Got it</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export modal -->
+<div class="modal-backdrop" id="export-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title">Export comments</div>
+      <button class="modal-close" id="export-close" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="export-tabs">
+        <button class="export-tab active" data-fmt="json">JSON (for Claude)</button>
+        <button class="export-tab" data-fmt="md">Markdown</button>
+      </div>
+      <div class="export-content" id="export-content"></div>
+    </div>
+    <div class="modal-footer">
+      <span class="modal-hint" id="export-hint"></span>
+      <div class="modal-actions">
+        <button class="btn" id="export-copy">Copy</button>
+        <button class="btn" id="export-save-project" title="Save to a project folder (persists — subsequent exports auto-save)">Save to project</button>
+        <button class="btn btn-primary" id="export-download">Download</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__DOCS__ = __DOCS_JSON__;
+  window.__META__ = __META_JSON__;
+</script>
+
+<script>
+"use strict";
+(function () {
+  const DOCS = window.__DOCS__ || [];
+  const META = window.__META__ || {};
+  const DOCS_BY_PATH = new Map(DOCS.map((d) => [d.path, d]));
+  const STORAGE_KEY = `doc-reviewer.${META.session_id || "default"}.comments.v1`;
+  const PREFS_KEY = "doc-reviewer.prefs.v1";
+  const CONTEXT_LEN = 40;
+
+  const state = {
+    activePath: null,
+    comments: loadComments(),
+    scope: "doc",
+    focusedCommentId: null,
+    pendingSelection: null,
+    prefs: loadPrefs(),
+    exportDirHandle: null,
+    liveDirHandle: null,
+    liveMode: false,
+  };
+
+  // ---- Markdown setup ----
+  if (window.marked && window.hljs) {
+    marked.setOptions({
+      gfm: true,
+      breaks: false,
+      headerIds: true,
+      mangle: false,
+    });
+    // Custom renderer with syntax highlighting + heading IDs
+    const renderer = new marked.Renderer();
+    const origCode = renderer.code.bind(renderer);
+    renderer.code = function (code, lang) {
+      const info = (lang || "").split(/\s+/)[0];
+      if (info && hljs.getLanguage(info)) {
+        try {
+          const html = hljs.highlight(code, { language: info, ignoreIllegals: true }).value;
+          return `<pre><code class="hljs language-${info}">${html}</code></pre>`;
+        } catch (_) { /* fall through */ }
+      }
+      // Auto-detect language on plain fences
+      if (!info) {
+        try {
+          const auto = hljs.highlightAuto(code, ["javascript","python","typescript","json","yaml","bash","sh","sql","html","css","dockerfile"]).value;
+          return `<pre><code class="hljs">${auto}</code></pre>`;
+        } catch (_) { /* fall through */ }
+      }
+      return origCode(code, lang);
+    };
+    marked.use({ renderer });
+  }
+
+  // ---- Persistence ----
+  function loadComments() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (_) { return []; }
+  }
+  function saveComments() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.comments)); }
+    catch (e) { toast("Could not save to localStorage: " + e.message); }
+  }
+  function loadPrefs() {
+    try {
+      const raw = localStorage.getItem(PREFS_KEY);
+      return raw ? JSON.parse(raw) : { theme: "dark", lastPath: null };
+    } catch (_) { return { theme: "dark", lastPath: null }; }
+  }
+  function savePrefs() {
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify(state.prefs)); } catch (_) {}
+  }
+
+  // ---- DOM refs ----
+  const el = {
+    projectName: document.getElementById("project-name"),
+    liveBadge: document.getElementById("live-badge"),
+    stats: document.getElementById("stats"),
+    search: document.getElementById("search"),
+    themeToggle: document.getElementById("theme-toggle"),
+    refreshBtn: document.getElementById("refresh-btn"),
+    liveBtn: document.getElementById("live-btn"),
+    helpBtn: document.getElementById("help-btn"),
+    exportBtn: document.getElementById("export-btn"),
+    helpBackdrop: document.getElementById("help-backdrop"),
+    helpClose: document.getElementById("help-close"),
+    helpOk: document.getElementById("help-ok"),
+    exportSaveProject: document.getElementById("export-save-project"),
+    editBtn: document.getElementById("edit-btn"),
+    editor: document.getElementById("editor"),
+    editorTextarea: document.getElementById("editor-textarea"),
+    editorPreview: document.getElementById("editor-preview"),
+    editorPreviewToggle: document.getElementById("editor-preview-toggle"),
+    editorSave: document.getElementById("editor-save"),
+    editorCancel: document.getElementById("editor-cancel"),
+    editorStatus: document.getElementById("editor-status"),
+    docList: document.getElementById("doc-list"),
+    reader: document.getElementById("reader"),
+    readerPlaceholder: document.getElementById("reader-placeholder"),
+    readerInner: document.getElementById("reader-inner"),
+    readerPath: document.getElementById("reader-path"),
+    readerTitle: document.getElementById("reader-title"),
+    readerMeta: document.getElementById("reader-meta"),
+    markdown: document.getElementById("markdown"),
+    commentsCount: document.getElementById("comments-count"),
+    commentsScroll: document.getElementById("comments-scroll"),
+    commentsTabs: document.querySelectorAll(".comments-tab"),
+    clearBtn: document.getElementById("clear-btn"),
+    popover: document.getElementById("popover"),
+    popoverAdd: document.getElementById("popover-add"),
+    modalBackdrop: document.getElementById("modal-backdrop"),
+    modalQuote: document.getElementById("modal-quote"),
+    modalTextarea: document.getElementById("modal-textarea"),
+    modalClose: document.getElementById("modal-close"),
+    modalCancel: document.getElementById("modal-cancel"),
+    modalSave: document.getElementById("modal-save"),
+    exportBackdrop: document.getElementById("export-backdrop"),
+    exportClose: document.getElementById("export-close"),
+    exportContent: document.getElementById("export-content"),
+    exportCopy: document.getElementById("export-copy"),
+    exportDownload: document.getElementById("export-download"),
+    exportHint: document.getElementById("export-hint"),
+    exportTabs: document.querySelectorAll(".export-tab"),
+  };
+
+  // ---- Init ----
+  function init() {
+    el.projectName.textContent = META.project || "";
+    document.title = `Marginalia — ${META.project || "docs"}`;
+    document.documentElement.setAttribute("data-theme", state.prefs.theme || "dark");
+    updateThemeToggle();
+    updateStats();
+    renderDocList();
+
+    // Hide FSA-dependent buttons if the browser doesn't support the API
+    if (!("showDirectoryPicker" in window)) {
+      if (el.liveBtn) el.liveBtn.hidden = true;
+      if (el.exportSaveProject) el.exportSaveProject.hidden = true;
+    }
+
+    // Restore last-open doc if possible
+    const restore = state.prefs.lastPath && DOCS_BY_PATH.has(state.prefs.lastPath)
+      ? state.prefs.lastPath
+      : (DOCS[0] && DOCS[0].path);
+    if (restore) openDoc(restore);
+
+    bindEvents();
+
+    // First-run help
+    if (!state.prefs.seenHelp) {
+      setTimeout(openHelp, 400);
+      state.prefs.seenHelp = true;
+      savePrefs();
+    }
+  }
+
+  function updateStats() {
+    const total = state.comments.length;
+    const open = state.comments.filter((c) => c.status === "open").length;
+    el.stats.textContent = `${META.file_count || DOCS.length} docs · ${(META.total_lines || 0).toLocaleString()} lines · ${open}/${total} comments`;
+  }
+
+  function updateThemeToggle() {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    el.themeToggle.textContent = isDark ? "☀" : "🌙";
+    el.themeToggle.title = isDark ? "Switch to light theme" : "Switch to dark theme";
+    // hljs theme
+    const dark = document.getElementById("hljs-theme-dark");
+    const light = document.getElementById("hljs-theme-light");
+    if (dark && light) {
+      dark.disabled = !isDark;
+      light.disabled = isDark;
+    }
+  }
+
+  // ---- Sidebar / doc list ----
+  function groupedDocs(filter) {
+    const q = (filter || "").trim().toLowerCase();
+    const groups = new Map();
+    for (const d of DOCS) {
+      if (q) {
+        const hay = (d.path + "\n" + d.content).toLowerCase();
+        if (!hay.includes(q)) continue;
+      }
+      const g = d.group || "";
+      if (!groups.has(g)) groups.set(g, []);
+      groups.get(g).push(d);
+    }
+    return groups;
+  }
+
+  function renderDocList(filter) {
+    const groups = groupedDocs(filter);
+    const parts = [];
+    // Root group first, then alphabetical
+    const sortedKeys = [...groups.keys()].sort((a, b) => (a === "" ? -1 : b === "" ? 1 : a.localeCompare(b)));
+    for (const g of sortedKeys) {
+      const groupLabel = g === "" ? "root" : g;
+      parts.push(`<li class="sidebar-section-label">${escapeHtml(groupLabel)}</li>`);
+      for (const d of groups.get(g)) {
+        const badge = commentsForDoc(d.path).filter((c) => c.status === "open").length;
+        parts.push(`
+          <li class="doc-item ${state.activePath === d.path ? "active" : ""}" data-path="${escapeAttr(d.path)}">
+            <span class="doc-name">${escapeHtml(d.name)}</span>
+            ${badge > 0 ? `<span class="comment-badge" title="${badge} open comment(s)">${badge}</span>` : `<span class="doc-meta">${d.lines.toLocaleString()}L</span>`}
+          </li>
+        `);
+      }
+    }
+    if (parts.length === 0) parts.push(`<li class="comments-empty">No matches</li>`);
+    el.docList.innerHTML = parts.join("");
+  }
+
+  // ---- Reader ----
+  function openDoc(path) {
+    const doc = DOCS_BY_PATH.get(path);
+    if (!doc) return;
+    state.activePath = path;
+    state.prefs.lastPath = path;
+    savePrefs();
+
+    el.readerPlaceholder.hidden = true;
+    el.readerInner.hidden = false;
+    el.readerPath.textContent = doc.path;
+    el.readerTitle.textContent = firstHeading(doc.content) || doc.stem;
+    el.readerMeta.innerHTML = `${doc.lines.toLocaleString()} lines · ${humanBytes(doc.size)} · ${doc.hash}`;
+
+    const html = window.marked ? marked.parse(doc.content) : escapeHtml(doc.content);
+    el.markdown.innerHTML = html;
+
+    // Add heading IDs (marked v12 dropped headerIds option)
+    addHeadingIds(el.markdown);
+
+    // Intercept internal links (e.g. links to other docs in the bundle)
+    interceptInternalLinks(el.markdown);
+
+    // Apply highlights for existing comments on this doc
+    applyHighlights();
+    // Scroll reader to top
+    el.reader.scrollTop = 0;
+
+    renderDocList(el.search.value);
+    renderComments();
+  }
+
+  function firstHeading(md) {
+    const m = /^#\s+(.+?)\s*$/m.exec(md);
+    return m ? m[1] : null;
+  }
+
+  function humanBytes(n) {
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+    return `${(n / 1024 / 1024).toFixed(2)} MB`;
+  }
+
+  function slugify(text) {
+    return String(text || "").toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+  }
+
+  function addHeadingIds(container) {
+    const seen = new Map();
+    for (const h of container.querySelectorAll("h1,h2,h3,h4,h5,h6")) {
+      let id = slugify(h.textContent);
+      if (!id) continue;
+      if (seen.has(id)) {
+        const n = (seen.get(id) || 0) + 1;
+        seen.set(id, n);
+        id = id + "-" + n;
+      } else {
+        seen.set(id, 0);
+      }
+      h.id = id;
+    }
+  }
+
+  function interceptInternalLinks(root) {
+    for (const a of root.querySelectorAll("a")) {
+      const href = a.getAttribute("href");
+      if (!href) continue;
+      // Same-page anchor: intercept so file:// URL bar doesn't fight the scroll
+      if (href.startsWith("#")) {
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          const id = href.slice(1);
+          const target = document.getElementById(id);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            // brief highlight so the user sees where they landed
+            target.classList.add("heading-flash");
+            setTimeout(() => target.classList.remove("heading-flash"), 1400);
+          }
+        });
+        continue;
+      }
+      // Detect and drop any docs-dir prefix (e.g. link says "07-foo.md" but path is "docs/subsystems/07-foo.md")
+      const stripped = href.replace(/^\.?\//, "").replace(/#.*/, "");
+      const resolved = resolveDocPath(stripped);
+      if (resolved) {
+        a.setAttribute("data-doc-link", resolved);
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          openDoc(resolved);
+          // support #anchor in cross-doc links
+          const hashIdx = href.indexOf("#");
+          if (hashIdx >= 0) {
+            const id = href.slice(hashIdx + 1);
+            setTimeout(() => {
+              const target = document.getElementById(id);
+              if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 60);
+          }
+        });
+      }
+    }
+  }
+
+  function resolveDocPath(href) {
+    // Try exact match first
+    if (DOCS_BY_PATH.has(href)) return href;
+    // Try relative to current doc's folder
+    if (state.activePath) {
+      const currentDir = state.activePath.split("/").slice(0, -1).join("/");
+      const combined = currentDir ? currentDir + "/" + href : href;
+      const norm = normalizePath(combined);
+      if (DOCS_BY_PATH.has(norm)) return norm;
+    }
+    // Try href only (basename)
+    for (const p of DOCS_BY_PATH.keys()) {
+      if (p.endsWith("/" + href) || p === href) return p;
+    }
+    return null;
+  }
+  function normalizePath(p) {
+    const parts = p.split("/");
+    const out = [];
+    for (const seg of parts) {
+      if (seg === "." || seg === "") continue;
+      if (seg === "..") out.pop();
+      else out.push(seg);
+    }
+    return out.join("/");
+  }
+
+  // ---- Highlight application ----
+  function applyHighlights() {
+    const docComments = commentsForDoc(state.activePath);
+    for (const c of docComments) {
+      if (!highlightComment(c)) {
+        // Not found — mark as unanchored (still visible in comments panel)
+        c._unanchored = true;
+      } else {
+        c._unanchored = false;
+      }
+    }
+  }
+
+  function highlightComment(comment) {
+    if (!comment.quote) return false;
+    const status = comment.status || "open";
+    const title = comment.comment.slice(0, 120) + (comment.comment.length > 120 ? "…" : "");
+
+    // 1) Fast path — quote fits in a single text node
+    const walker = document.createTreeWalker(el.markdown, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement && n.parentElement.closest("mark.comment-mark"))
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT,
+    });
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.nodeValue;
+      const idx = text.indexOf(comment.quote);
+      if (idx === -1) continue;
+      try {
+        const range = document.createRange();
+        range.setStart(node, idx);
+        range.setEnd(node, idx + comment.quote.length);
+        const mark = document.createElement("mark");
+        mark.className = "comment-mark status-" + status;
+        mark.dataset.commentId = comment.id;
+        mark.title = title;
+        range.surroundContents(mark);
+        mark.addEventListener("click", (e) => {
+          e.stopPropagation();
+          focusComment(comment.id);
+        });
+        return true;
+      } catch (_) { /* fall through to multi-node path */ break; }
+    }
+
+    // 2) Multi-node path — locate the quote in the concatenated plain text
+    // of the reader and wrap each intersecting text-node slice separately.
+    const plainNodes = [];
+    const walker2 = document.createTreeWalker(el.markdown, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement && n.parentElement.closest("mark.comment-mark"))
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT,
+    });
+    let n;
+    let concat = "";
+    const nodeOffsets = []; // { node, start, end } in concat coords
+    while ((n = walker2.nextNode())) {
+      const t = n.nodeValue;
+      nodeOffsets.push({ node: n, start: concat.length, end: concat.length + t.length });
+      concat += t;
+    }
+    const start = concat.indexOf(comment.quote);
+    if (start === -1) return false;
+    const end = start + comment.quote.length;
+
+    // Walk nodeOffsets, wrapping each intersecting text-slice in a fresh mark.
+    let anyWrapped = false;
+    for (const { node, start: ns, end: ne } of nodeOffsets) {
+      if (ne <= start || ns >= end) continue;
+      const localStart = Math.max(0, start - ns);
+      const localEnd = Math.min(node.nodeValue.length, end - ns);
+      if (localEnd <= localStart) continue;
+      try {
+        const range = document.createRange();
+        range.setStart(node, localStart);
+        range.setEnd(node, localEnd);
+        const mark = document.createElement("mark");
+        mark.className = "comment-mark status-" + status;
+        mark.dataset.commentId = comment.id;
+        mark.title = title;
+        range.surroundContents(mark);
+        mark.addEventListener("click", (e) => {
+          e.stopPropagation();
+          focusComment(comment.id);
+        });
+        anyWrapped = true;
+      } catch (_) { /* skip this slice */ }
+    }
+    return anyWrapped;
+  }
+
+  function focusComment(id) {
+    state.focusedCommentId = id;
+    // Highlight the mark
+    for (const m of el.markdown.querySelectorAll("mark.comment-mark")) {
+      m.classList.toggle("focus", m.dataset.commentId === id);
+    }
+    // Scroll first matching mark into view
+    const first = el.markdown.querySelector(`mark[data-comment-id="${cssEscape(id)}"]`);
+    if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+    renderComments();
+  }
+
+  function scrollToQuote(comment) {
+    if (comment.doc_path !== state.activePath) {
+      openDoc(comment.doc_path);
+      setTimeout(() => focusComment(comment.id), 200);
+    } else {
+      focusComment(comment.id);
+    }
+  }
+
+  // ---- Comments rendering ----
+  function commentsForDoc(path) {
+    return state.comments.filter((c) => c.doc_path === path);
+  }
+
+  function visibleComments() {
+    if (state.scope === "doc") return commentsForDoc(state.activePath);
+    if (state.scope === "open") return state.comments.filter((c) => c.status === "open");
+    return state.comments.slice();
+  }
+
+  function renderComments() {
+    const list = visibleComments();
+    // sort: unresolved first, then by newest
+    list.sort((a, b) => {
+      const so = statusOrder(a.status) - statusOrder(b.status);
+      if (so !== 0) return so;
+      return (b.created_at || "").localeCompare(a.created_at || "");
+    });
+    el.commentsCount.textContent = list.length;
+
+    if (list.length === 0) {
+      el.commentsScroll.innerHTML = `
+        <div class="comments-empty">
+          <p>No comments ${state.scope === "doc" ? "on this document" : "yet"}.</p>
+          <small>Select any text to add one.</small>
+        </div>`;
+      return;
+    }
+
+    const parts = list.map((c) => renderCommentCard(c));
+    el.commentsScroll.innerHTML = parts.join("");
+
+    // Bind actions
+    for (const btn of el.commentsScroll.querySelectorAll("[data-action]")) {
+      btn.addEventListener("click", handleCommentAction);
+    }
+    for (const q of el.commentsScroll.querySelectorAll(".comment-card-quote")) {
+      q.addEventListener("click", () => {
+        const id = q.closest(".comment-card").dataset.commentId;
+        const c = state.comments.find((x) => x.id === id);
+        if (c) scrollToQuote(c);
+      });
+    }
+    for (const dp of el.commentsScroll.querySelectorAll(".comment-card-doc")) {
+      dp.addEventListener("click", () => {
+        const path = dp.dataset.path;
+        if (path && DOCS_BY_PATH.has(path)) openDoc(path);
+      });
+    }
+    updateStats();
+  }
+
+  function renderCommentCard(c) {
+    const focus = state.focusedCommentId === c.id ? "focus" : "";
+    const scopeAll = state.scope !== "doc";
+    const anchor = c._unanchored ? ` <span title="Quote not found in current doc — text may have changed" style="color: var(--danger)">⚠</span>` : "";
+    return `
+      <div class="comment-card status-${c.status} ${focus}" data-comment-id="${escapeAttr(c.id)}">
+        ${scopeAll ? `<div class="comment-card-doc" data-path="${escapeAttr(c.doc_path)}">${escapeHtml(c.doc_path)}</div>` : ""}
+        <div class="comment-card-quote">${escapeHtml(c.quote)}${anchor}</div>
+        <div class="comment-card-body" data-role="body">${escapeHtml(c.comment)}</div>
+        <div class="comment-card-footer">
+          <span class="comment-status-chip status-${c.status}">${c.status}</span>
+          <span>${formatDate(c.created_at)}</span>
+          <span class="spacer"></span>
+          <button class="btn btn-ghost" data-action="edit" title="Edit comment">✎</button>
+          ${c.status === "open" ? `<button class="btn btn-ghost" data-action="resolve" title="Mark as resolved">✓</button>` : ""}
+          ${c.status !== "open" ? `<button class="btn btn-ghost" data-action="reopen" title="Reopen">↺</button>` : ""}
+          <button class="btn btn-ghost" data-action="dismiss" title="Dismiss">⊘</button>
+          <button class="btn btn-ghost btn-danger" data-action="delete" title="Delete">🗑</button>
+        </div>
+      </div>`;
+  }
+
+  function statusOrder(s) {
+    return s === "open" ? 0 : s === "resolved" ? 1 : 2;
+  }
+
+  function handleCommentAction(e) {
+    const btn = e.currentTarget;
+    const action = btn.dataset.action;
+    const card = btn.closest(".comment-card");
+    const id = card.dataset.commentId;
+    const c = state.comments.find((x) => x.id === id);
+    if (!c) return;
+
+    if (action === "resolve") { c.status = "resolved"; }
+    else if (action === "dismiss") { c.status = "dismissed"; }
+    else if (action === "reopen") { c.status = "open"; }
+    else if (action === "delete") {
+      if (!confirm("Delete this comment?")) return;
+      state.comments = state.comments.filter((x) => x.id !== id);
+    }
+    else if (action === "edit") {
+      startEditComment(c, card);
+      return;
+    }
+    saveComments();
+    if (state.activePath) applyHighlights();
+    renderComments();
+    if (state.activePath) {
+      // Re-render doc to refresh highlight statuses
+      openDoc(state.activePath);
+    }
+    renderDocList(el.search.value);
+  }
+
+  function startEditComment(comment, card) {
+    const body = card.querySelector('[data-role="body"]');
+    body.setAttribute("contenteditable", "true");
+    body.focus();
+    // place cursor at end
+    const range = document.createRange();
+    range.selectNodeContents(body);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges(); sel.addRange(range);
+
+    const finish = (save) => {
+      body.removeAttribute("contenteditable");
+      if (save) {
+        const val = body.innerText.trim();
+        if (val && val !== comment.comment) {
+          comment.comment = val;
+          comment.updated_at = new Date().toISOString();
+          saveComments();
+        }
+      }
+      body.removeEventListener("keydown", onKey);
+      body.removeEventListener("blur", onBlur);
+      renderComments();
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") { e.preventDefault(); finish(false); }
+      else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); finish(true); }
+    };
+    const onBlur = () => finish(true);
+    body.addEventListener("keydown", onKey);
+    body.addEventListener("blur", onBlur);
+  }
+
+  // ---- Selection popover ----
+  function onSelectionChange() {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+      hidePopover();
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    if (!el.markdown.contains(range.commonAncestorContainer)) {
+      hidePopover();
+      return;
+    }
+    const text = sel.toString().trim();
+    if (text.length < 3) { hidePopover(); return; }
+    if (text.length > 800) { hidePopover(); toast("Selection too long (max 800 chars)"); return; }
+    // Capture context
+    const containerText = getContainerText(range.commonAncestorContainer);
+    const quote = sel.toString();
+    let contextBefore = "";
+    let contextAfter = "";
+    if (containerText) {
+      const i = containerText.indexOf(quote);
+      if (i !== -1) {
+        contextBefore = containerText.slice(Math.max(0, i - CONTEXT_LEN), i);
+        contextAfter = containerText.slice(i + quote.length, i + quote.length + CONTEXT_LEN);
+      }
+    }
+    state.pendingSelection = { quote, contextBefore, contextAfter };
+    positionPopover(range);
+  }
+
+  function getContainerText(node) {
+    while (node && node.nodeType !== 1) node = node.parentNode;
+    return node ? node.textContent : "";
+  }
+
+  function positionPopover(range) {
+    const rect = range.getBoundingClientRect();
+    el.popover.style.left = (rect.left + rect.width / 2) + "px";
+    el.popover.style.top = rect.top + "px";
+    el.popover.hidden = false;
+  }
+  function hidePopover() { el.popover.hidden = true; }
+
+  // ---- Modal ----
+  function openModal() {
+    if (!state.pendingSelection) return;
+    hidePopover();
+    el.modalQuote.textContent = state.pendingSelection.quote;
+    el.modalTextarea.value = "";
+    el.modalBackdrop.hidden = false;
+    // Double-RAF so the browser has painted the modal before we ask focus —
+    // avoids the case where focus() is called before the element is layout-visible.
+    requestAnimationFrame(() => requestAnimationFrame(() => el.modalTextarea.focus()));
+  }
+  function closeModal() {
+    el.modalBackdrop.hidden = true;
+    state.pendingSelection = null;
+  }
+  function saveModal() {
+    const text = el.modalTextarea.value.trim();
+    if (!text) { toast("Comment cannot be empty"); return; }
+    if (!state.pendingSelection) { closeModal(); return; }
+    const now = new Date().toISOString();
+    const comment = {
+      id: "c_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4),
+      doc_path: state.activePath,
+      quote: state.pendingSelection.quote,
+      context_before: state.pendingSelection.contextBefore,
+      context_after: state.pendingSelection.contextAfter,
+      comment: text,
+      created_at: now,
+      updated_at: now,
+      status: "open",
+    };
+    state.comments.push(comment);
+    saveComments();
+    closeModal();
+    if (state.activePath) openDoc(state.activePath);
+    focusComment(comment.id);
+  }
+
+  // ---- Export ----
+  function openExport() {
+    setExportFormat("json");
+    el.exportBackdrop.hidden = false;
+  }
+  function closeExport() { el.exportBackdrop.hidden = true; }
+
+  function setExportFormat(fmt) {
+    for (const t of el.exportTabs) t.classList.toggle("active", t.dataset.fmt === fmt);
+    el.exportContent.dataset.fmt = fmt;
+    if (fmt === "json") {
+      el.exportContent.textContent = buildExportJson();
+      el.exportHint.textContent = `${state.comments.length} comment(s) · paste back into Claude Code to act on them`;
+    } else {
+      el.exportContent.textContent = buildExportMarkdown();
+      el.exportHint.textContent = `${state.comments.length} comment(s) as Markdown`;
+    }
+  }
+
+  function buildExportJson() {
+    const payload = {
+      schema: "doc-reviewer.v1",
+      project: META.project,
+      docs_dir: META.docs_dir_display,
+      generated_at: new Date().toISOString(),
+      generator_session_id: META.session_id,
+      file_count: META.file_count,
+      comments: state.comments.map(({ _unanchored, ...c }) => c),
+    };
+    return JSON.stringify(payload, null, 2);
+  }
+
+  function buildExportMarkdown() {
+    if (state.comments.length === 0) return "_No comments._";
+    const byDoc = new Map();
+    for (const c of state.comments) {
+      if (!byDoc.has(c.doc_path)) byDoc.set(c.doc_path, []);
+      byDoc.get(c.doc_path).push(c);
+    }
+    const lines = [
+      `# Doc review comments`,
+      ``,
+      `_Project: ${META.project} · exported ${new Date().toISOString()} · ${state.comments.length} comment(s)_`,
+      ``,
+    ];
+    for (const [path, list] of byDoc) {
+      lines.push(`## \`${path}\``, ``);
+      list.sort((a, b) => (a.created_at || "").localeCompare(b.created_at || ""));
+      let i = 1;
+      for (const c of list) {
+        lines.push(
+          `### ${i++}. [${c.status}] ${escapeMd(c.comment.split("\n")[0]).slice(0, 80)}`,
+          ``,
+          `> ${c.quote.split("\n").join("\n> ")}`,
+          ``,
+          c.comment,
+          ``,
+          `_id: \`${c.id}\` · created ${formatDate(c.created_at)}_`,
+          ``,
+          `---`,
+          ``,
+        );
+      }
+    }
+    return lines.join("\n");
+  }
+
+  function downloadExport() {
+    const fmt = el.exportContent.dataset.fmt || "json";
+    const content = el.exportContent.textContent;
+    const ext = fmt === "json" ? "json" : "md";
+    const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const safeProject = (META.project || "docs").toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+    const filename = `doc-reviewer-comments-${safeProject}-${ts}.${ext}`;
+    const blob = new Blob([content], { type: fmt === "json" ? "application/json" : "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast(`Downloaded ${filename}`);
+  }
+  async function copyExport() {
+    try {
+      await navigator.clipboard.writeText(el.exportContent.textContent);
+      toast("Copied to clipboard");
+    } catch (e) {
+      toast("Copy failed: " + e.message);
+    }
+  }
+
+  async function saveExportToProject() {
+    // Uses File System Access API. If we already have a directory handle,
+    // write silently. Else prompt for one; keep the handle in memory for
+    // subsequent saves this session.
+    if (!("showDirectoryPicker" in window)) {
+      toast("Browser does not support File System Access. Use Download instead.");
+      return;
+    }
+    try {
+      if (!state.exportDirHandle) {
+        toast("Pick a folder for exports — typically .claude/scratchpad/");
+        state.exportDirHandle = await window.showDirectoryPicker({
+          mode: "readwrite",
+          startIn: "documents",
+        });
+      }
+      const fmt = el.exportContent.dataset.fmt || "json";
+      const ext = fmt === "json" ? "json" : "md";
+      const filename = `marginalia-comments.${ext}`;
+      const fh = await state.exportDirHandle.getFileHandle(filename, { create: true });
+      const w = await fh.createWritable();
+      await w.write(el.exportContent.textContent);
+      await w.close();
+      toast(`Saved ${filename} to project (Claude can read this path directly)`);
+    } catch (e) {
+      if (e.name === "AbortError") return;
+      toast("Save failed: " + e.message);
+      state.exportDirHandle = null;
+    }
+  }
+
+  // ---- Live mode (File System Access API) ----
+  async function connectLive() {
+    if (!("showDirectoryPicker" in window)) {
+      toast("Browser does not support live mode. Rebuild via `python build.py` to refresh docs.");
+      return;
+    }
+    try {
+      const handle = await window.showDirectoryPicker({ mode: "read", startIn: "documents" });
+      state.liveDirHandle = handle;
+      state.liveMode = true;
+      el.liveBadge.hidden = false;
+      el.liveBtn.textContent = "🔗";
+      el.liveBtn.title = "Live mode active — click Refresh to re-read from disk";
+      await refreshFromLive();
+      toast(`Live mode: reading from ${handle.name}/ — click ↻ to re-read on doc changes`);
+    } catch (e) {
+      if (e.name === "AbortError") return;
+      toast("Could not connect: " + e.message);
+    }
+  }
+
+  async function refreshFromLive() {
+    if (!state.liveDirHandle) return;
+    try {
+      const freshDocs = [];
+      await walkDirForMd(state.liveDirHandle, "", freshDocs);
+      if (!freshDocs.length) {
+        toast("No .md files found in the connected folder");
+        return;
+      }
+      // Replace globals so the rest of the app sees the new set
+      window.__DOCS__ = freshDocs;
+      DOCS.length = 0;
+      DOCS.push(...freshDocs);
+      DOCS_BY_PATH.clear();
+      for (const d of freshDocs) DOCS_BY_PATH.set(d.path, d);
+      // Re-render sidebar; try to keep active doc if it still exists
+      const wasActive = state.activePath;
+      renderDocList(el.search.value);
+      if (wasActive && DOCS_BY_PATH.has(wasActive)) openDoc(wasActive);
+      else if (freshDocs[0]) openDoc(freshDocs[0].path);
+      META.file_count = freshDocs.length;
+      META.total_lines = freshDocs.reduce((s, d) => s + d.lines, 0);
+      updateStats();
+      toast(`Refreshed — ${freshDocs.length} docs from disk`);
+    } catch (e) {
+      toast("Refresh failed: " + e.message);
+    }
+  }
+
+  async function walkDirForMd(dirHandle, prefix, out) {
+    for await (const [name, handle] of dirHandle.entries()) {
+      if (name.startsWith(".") || name === "node_modules" || name === "vendor") continue;
+      const rel = prefix ? prefix + "/" + name : name;
+      if (handle.kind === "directory") {
+        await walkDirForMd(handle, rel, out);
+      } else if (handle.kind === "file" && name.endsWith(".md")) {
+        try {
+          const file = await handle.getFile();
+          const content = await file.text();
+          const parent = prefix || "";
+          out.push({
+            path: rel,
+            name,
+            stem: name.replace(/\.md$/, ""),
+            group: parent,
+            content,
+            size: content.length,
+            lines: content.split("\n").length,
+            hash: await sha1Short(content),
+            mtime: Math.floor(file.lastModified / 1000),
+          });
+        } catch (_) { /* skip unreadable files */ }
+      }
+    }
+    // sort naturally
+    out.sort((a, b) => {
+      const g = a.group.localeCompare(b.group);
+      if (g !== 0) return g;
+      return naturalCmp(a.path, b.path);
+    });
+  }
+
+  async function sha1Short(text) {
+    try {
+      const buf = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest("SHA-1", buf);
+      return [...new Uint8Array(digest)].slice(0, 5).map(b => b.toString(16).padStart(2, "0")).join("");
+    } catch { return ""; }
+  }
+
+  function naturalCmp(a, b) {
+    const re = /(\d+)|(\D+)/g;
+    const A = a.match(re) || [], B = b.match(re) || [];
+    for (let i = 0; i < Math.max(A.length, B.length); i++) {
+      const x = A[i] ?? "", y = B[i] ?? "";
+      const xn = /^\d+$/.test(x), yn = /^\d+$/.test(y);
+      if (xn && yn) { const d = Number(x) - Number(y); if (d) return d; }
+      else { const d = x.localeCompare(y); if (d) return d; }
+    }
+    return 0;
+  }
+
+  function refreshAction() {
+    if (state.liveMode) {
+      refreshFromLive();
+    } else {
+      // In bundled mode, tell the user the truth: the HTML has stale docs.
+      // Reload keeps localStorage comments; the HTML itself must be rebuilt
+      // to pick up disk changes.
+      toast("Reloading (comments preserved). To pick up disk changes, re-run the skill or enable Live mode.");
+      setTimeout(() => location.reload(), 700);
+    }
+  }
+
+  function openHelp() { el.helpBackdrop.hidden = false; }
+  function closeHelp() { el.helpBackdrop.hidden = true; }
+
+  // ---- In-app editor ----
+  function draftKey(path) { return `marginalia.draft.${META.session_id}.${path}`; }
+
+  function openEditor() {
+    if (!state.activePath) return;
+    const doc = DOCS_BY_PATH.get(state.activePath);
+    if (!doc) return;
+    state.editing = { path: state.activePath, original: doc.content, dirty: false };
+    // Restore draft if one exists
+    const draft = localStorage.getItem(draftKey(state.activePath));
+    el.editorTextarea.value = draft != null ? draft : doc.content;
+    if (draft != null && draft !== doc.content) {
+      state.editing.dirty = true;
+    }
+    el.markdown.hidden = true;
+    el.editor.hidden = false;
+    el.editorPreview.hidden = true;
+    el.editBtn.hidden = true;
+    updateEditorStatus();
+    requestAnimationFrame(() => requestAnimationFrame(() => el.editorTextarea.focus()));
+  }
+
+  function closeEditor(discardChanges) {
+    if (!state.editing) return;
+    if (state.editing.dirty && !discardChanges) {
+      if (!confirm("Discard unsaved changes?")) return;
+    }
+    if (discardChanges || !state.editing.dirty) {
+      localStorage.removeItem(draftKey(state.editing.path));
+    }
+    state.editing = null;
+    el.editor.hidden = true;
+    el.markdown.hidden = false;
+    el.editBtn.hidden = false;
+  }
+
+  function updateEditorStatus() {
+    if (!state.editing) return;
+    if (state.editing.dirty) {
+      el.editorStatus.textContent = "● unsaved changes";
+      el.editorStatus.classList.add("dirty");
+    } else {
+      el.editorStatus.textContent = "saved";
+      el.editorStatus.classList.remove("dirty");
+    }
+  }
+
+  function onEditorInput() {
+    if (!state.editing) return;
+    const val = el.editorTextarea.value;
+    state.editing.dirty = val !== state.editing.original;
+    updateEditorStatus();
+    localStorage.setItem(draftKey(state.editing.path), val);
+    // If preview is visible, live-update it (debounced)
+    if (!el.editorPreview.hidden) {
+      clearTimeout(state.editorPreviewTimer);
+      state.editorPreviewTimer = setTimeout(renderEditorPreview, 250);
+    }
+  }
+
+  function renderEditorPreview() {
+    if (window.marked) el.editorPreview.innerHTML = marked.parse(el.editorTextarea.value);
+    else el.editorPreview.textContent = el.editorTextarea.value;
+  }
+
+  function togglePreview() {
+    if (el.editorPreview.hidden) {
+      renderEditorPreview();
+      el.editorPreview.hidden = false;
+      el.editorPreviewToggle.textContent = "✎ Editor";
+      el.editorPreviewToggle.title = "Hide preview";
+    } else {
+      el.editorPreview.hidden = true;
+      el.editorPreviewToggle.textContent = "👁 Preview";
+      el.editorPreviewToggle.title = "Show preview";
+    }
+  }
+
+  async function saveEditor() {
+    if (!state.editing) return;
+    const path = state.editing.path;
+    const content = el.editorTextarea.value;
+
+    // Try FS Access write via live-mode handle
+    if (state.liveDirHandle) {
+      try {
+        const fileHandle = await getFileHandleFromPath(state.liveDirHandle, path);
+        const w = await fileHandle.createWritable();
+        await w.write(content);
+        await w.close();
+        toast(`Saved ${path} to disk`);
+      } catch (e) {
+        toast("Save failed: " + e.message + " (try Live-mode reconnect)");
+        return;
+      }
+    } else if ("showSaveFilePicker" in window) {
+      // No live handle — offer a save dialog per file
+      try {
+        const suggestedName = path.split("/").pop() || "document.md";
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [{ description: "Markdown", accept: { "text/markdown": [".md"] } }],
+        });
+        const w = await handle.createWritable();
+        await w.write(content);
+        await w.close();
+        toast(`Saved as ${handle.name} (not linked to source — use Live mode 🔗 for direct edits)`);
+      } catch (e) {
+        if (e.name === "AbortError") return;
+        toast("Save failed: " + e.message);
+        return;
+      }
+    } else {
+      // Fallback — download
+      const blob = new Blob([content], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = path.split("/").pop() || "document.md";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast("Downloaded (browser doesn't support direct disk write)");
+    }
+
+    // Update in-memory doc content so the app reflects the save immediately
+    const doc = DOCS_BY_PATH.get(path);
+    if (doc) {
+      doc.content = content;
+      doc.size = content.length;
+      doc.lines = content.split("\n").length;
+    }
+    state.editing.original = content;
+    state.editing.dirty = false;
+    localStorage.removeItem(draftKey(path));
+    updateEditorStatus();
+  }
+
+  async function getFileHandleFromPath(rootHandle, relPath) {
+    // relPath is something like "subsystems/07-legality-confidence-engine.md"
+    // The rootHandle is what the user granted (e.g. their docs folder root).
+    // We attempt to walk from the root. If the user connected a broader
+    // ancestor (project root), we tolerate a "docs/" prefix — strip and retry.
+    const attempts = [relPath];
+    // Strip leading path segments in case connected dir is deeper than the file's rel path
+    const parts = relPath.split("/");
+    for (let i = 1; i < parts.length; i++) attempts.push(parts.slice(i).join("/"));
+
+    let lastErr;
+    for (const p of attempts) {
+      try {
+        return await walkToFile(rootHandle, p.split("/"));
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error("Could not resolve file within granted folder");
+  }
+
+  async function walkToFile(dirHandle, segments) {
+    let handle = dirHandle;
+    for (let i = 0; i < segments.length - 1; i++) {
+      handle = await handle.getDirectoryHandle(segments[i]);
+    }
+    return await handle.getFileHandle(segments[segments.length - 1]);
+  }
+
+  // ---- Events ----
+  function bindEvents() {
+    el.docList.addEventListener("click", (e) => {
+      const item = e.target.closest(".doc-item");
+      if (item) openDoc(item.dataset.path);
+    });
+
+    el.search.addEventListener("input", () => renderDocList(el.search.value));
+
+    el.themeToggle.addEventListener("click", () => {
+      const cur = document.documentElement.getAttribute("data-theme");
+      const next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      state.prefs.theme = next;
+      savePrefs();
+      updateThemeToggle();
+    });
+
+    document.addEventListener("selectionchange", debounce(onSelectionChange, 60));
+    document.addEventListener("mousedown", (e) => {
+      if (el.popover.contains(e.target)) return;
+      hidePopover();
+    });
+
+    el.popoverAdd.addEventListener("click", openModal);
+
+    el.modalClose.addEventListener("click", closeModal);
+    el.modalCancel.addEventListener("click", closeModal);
+    el.modalSave.addEventListener("click", saveModal);
+    el.modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === el.modalBackdrop) closeModal();
+    });
+
+    el.exportBtn.addEventListener("click", openExport);
+    el.exportClose.addEventListener("click", closeExport);
+    el.exportBackdrop.addEventListener("click", (e) => {
+      if (e.target === el.exportBackdrop) closeExport();
+    });
+    for (const t of el.exportTabs) t.addEventListener("click", () => setExportFormat(t.dataset.fmt));
+    el.exportCopy.addEventListener("click", copyExport);
+    el.exportDownload.addEventListener("click", downloadExport);
+    if (el.exportSaveProject) el.exportSaveProject.addEventListener("click", saveExportToProject);
+
+    // Refresh / Live-mode / Help
+    el.refreshBtn.addEventListener("click", refreshAction);
+    if (el.liveBtn) el.liveBtn.addEventListener("click", connectLive);
+    el.helpBtn.addEventListener("click", openHelp);
+    el.helpClose.addEventListener("click", closeHelp);
+    el.helpOk.addEventListener("click", closeHelp);
+    el.helpBackdrop.addEventListener("click", (e) => {
+      if (e.target === el.helpBackdrop) closeHelp();
+    });
+
+    // Editor
+    el.editBtn.addEventListener("click", openEditor);
+    el.editorSave.addEventListener("click", saveEditor);
+    el.editorCancel.addEventListener("click", () => closeEditor(false));
+    el.editorTextarea.addEventListener("input", onEditorInput);
+    el.editorPreviewToggle.addEventListener("click", togglePreview);
+    // Tab key inserts 2 spaces instead of navigating away
+    el.editorTextarea.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const ta = el.editorTextarea;
+        const start = ta.selectionStart, end = ta.selectionEnd;
+        ta.value = ta.value.slice(0, start) + "  " + ta.value.slice(end);
+        ta.selectionStart = ta.selectionEnd = start + 2;
+        onEditorInput();
+      }
+    });
+
+    for (const t of el.commentsTabs) {
+      t.addEventListener("click", () => {
+        state.scope = t.dataset.scope;
+        for (const x of el.commentsTabs) x.classList.toggle("active", x === t);
+        renderComments();
+      });
+    }
+
+    el.clearBtn.addEventListener("click", () => {
+      if (!confirm("Delete ALL comments across all docs? This cannot be undone.")) return;
+      state.comments = [];
+      saveComments();
+      if (state.activePath) openDoc(state.activePath);
+      renderComments();
+      renderDocList(el.search.value);
+      toast("All comments cleared");
+    });
+
+    document.addEventListener("keydown", (e) => {
+      // Don't hijack shortcuts when typing in inputs/textareas (except our own modal)
+      const isTyping = e.target && ["INPUT", "TEXTAREA"].includes(e.target.tagName)
+        && !el.modalBackdrop.contains(e.target);
+
+      if (e.key === "Escape") {
+        if (!el.modalBackdrop.hidden) closeModal();
+        else if (!el.exportBackdrop.hidden) closeExport();
+        else if (!el.helpBackdrop.hidden) closeHelp();
+        else hidePopover();
+      } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        if (!el.modalBackdrop.hidden) { e.preventDefault(); saveModal(); }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        el.search.focus();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        if (!el.modalBackdrop.hidden) return;
+        e.preventDefault();
+        if (state.editing) saveEditor();
+        else openExport();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
+        e.preventDefault();
+        if (state.editing) closeEditor(false);
+        else openEditor();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "r") {
+        // Only intercept when in live mode — otherwise let the browser reload naturally
+        if (state.liveMode) {
+          e.preventDefault();
+          refreshAction();
+        }
+      } else if (e.key === "?" && !isTyping) {
+        e.preventDefault();
+        if (el.helpBackdrop.hidden) openHelp(); else closeHelp();
+      }
+    });
+  }
+
+  // ---- Utilities ----
+  function toast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2400);
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "";
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    } catch (_) { return iso; }
+  }
+
+  function escapeHtml(s) {
+    if (s == null) return "";
+    return String(s)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+  function escapeMd(s) {
+    return String(s || "").replace(/([*_`~\\|])/g, "\\$1");
+  }
+
+  function cssEscape(id) {
+    return (window.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+  }
+
+  function debounce(fn, ms) {
+    let t;
+    return function (...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  // Start
+  document.addEventListener("DOMContentLoaded", init);
+  if (document.readyState !== "loading") init();
+})();
+</script>
+</body>
+</html>
