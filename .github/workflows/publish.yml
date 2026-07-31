@@ -40,7 +40,22 @@ jobs:
             exit 1
           fi
 
+      # npm rejects republishing an existing version. Skip cleanly instead of
+      # failing the run — 0.1.0 was published by hand before this workflow existed.
+      - name: Check whether this version is already on npm
+        id: exists
+        run: |
+          v=$(node -p "require('./package.json').version")
+          name=$(node -p "require('./package.json').name")
+          if npm view "$name@$v" version >/dev/null 2>&1; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$name@$v is already published — skipping publish."
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Smoke-test the tarball before publishing
+        if: steps.exists.outputs.already == 'false'
         run: |
           npm pack --pack-destination "$RUNNER_TEMP"
           mkdir -p "$RUNNER_TEMP/consumer" && cd "$RUNNER_TEMP/consumer"
@@ -51,6 +66,7 @@ jobs:
           grep -q "Marginalia" out.html
 
       - name: Publish
+        if: steps.exists.outputs.already == 'false'
         run: npm publish --access public
         # No NODE_AUTH_TOKEN here on purpose. An empty value still counts as a
         # value and npm would use it instead of falling back to OIDC.
