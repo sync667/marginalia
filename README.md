@@ -13,6 +13,13 @@
 
 An [Agent Skill](https://agentskills.io/specification) that turns any project's markdown documentation into a **local, self-contained web review tool**. Read all your docs in one place, highlight passages, add inline comments, edit content in-place, then hand the whole batch back to Claude to act on.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/screenshot-dark.png">
+    <img src="assets/screenshot-light.png" alt="Marginalia reviewing a documentation set: file tree on the left, rendered markdown with two highlighted passages in the middle, and the matching inline comments in the right-hand panel." width="100%">
+  </picture>
+</p>
+
 **Install** — two lines in Claude Code:
 
 ```
