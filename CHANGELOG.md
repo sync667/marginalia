@@ -6,7 +6,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [0.1.0] — Initial public release
 
+### Fixed
+- **Live mode could not save.** The folder picker requested read-only access, so the first save from the in-app editor failed with a permission error that looked like a bug. Live mode now requests read + write up front, and the editor re-requests permission if a handle ever loses it.
+
 ### Added
+- **Section-scoped editing** — the editor toolbar has a section dropdown. Pick a heading to edit just that section (subsections included) instead of scrolling the whole file; the edit is merged back into the full document on save. Headings inside fenced code blocks are ignored.
 - **npm package** — published as [`@sync667/marginalia`](https://www.npmjs.com/package/@sync667/marginalia). `npx @sync667/marginalia --docs-dir docs` runs the generator with no clone and no agent. A Node wrapper locates a local Python 3.9+ and forwards all arguments to `build.py`; it prints install guidance if no suitable interpreter is found.
 - **Brand logo** — `assets/logo.svg` used for the README, the app header, and the generated page's favicon.
 - **Claude Code plugin packaging** — `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json` make the repo a self-hosting one-plugin marketplace. Install with `/plugin marketplace add sync667/marginalia` then `/plugin install marginalia@marginalia`. Still works as a plain `.claude/skills/` clone or as a standalone script.

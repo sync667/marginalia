@@ -382,6 +382,19 @@ __HEAD_ASSETS__
     padding: 0 8px;
   }
   .editor-status.dirty { color: var(--accent); font-weight: 600; }
+  .editor-scope {
+    max-width: 320px;
+    padding: 4px 8px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    outline: none;
+  }
+  .editor-scope:focus { border-color: var(--accent); }
+  .editor-scope.scoped { border-color: var(--accent); color: var(--accent); }
   .editor-textarea {
     width: 100%;
     min-height: 62vh;
@@ -850,6 +863,7 @@ __HEAD_ASSETS__
       <div class="markdown" id="markdown"></div>
       <div class="editor" id="editor" hidden>
         <div class="editor-toolbar">
+          <select class="editor-scope" id="editor-scope" title="Edit only one section instead of the whole file"></select>
           <button class="icon-btn" id="editor-preview-toggle" title="Toggle preview">👁 Preview</button>
           <span class="editor-status" id="editor-status"></span>
           <span class="spacer"></span>
@@ -939,7 +953,19 @@ __HEAD_ASSETS__
           <li><strong>🔗 Connect</strong> to a docs folder to switch on <strong>Live mode</strong>. The page then reads
             <code>.md</code> files directly from disk, so <strong>refresh always shows the current file contents</strong>.
             Uses the File System Access API (Chrome / Edge; other browsers stay on bundled mode).</li>
-          <li>Rebuild the HTML from scratch by re-running the skill (or <code>python .claude/skills/marginalia/build.py</code>).</li>
+          <li>Connecting grants <strong>read + write</strong>, so the in-app editor can save straight back to disk.</li>
+          <li>Rebuild the HTML from scratch by re-running the skill (or <code>npx @sync667/marginalia</code>).</li>
+        </ul>
+
+        <h3>Editing a doc</h3>
+        <ul>
+          <li><strong>✎ Edit</strong> (or <kbd>Ctrl/Cmd+E</kbd>) opens the markdown editor for the current doc.</li>
+          <li>Use the <strong>section dropdown</strong> in the editor toolbar to work on one heading at a time
+            instead of the whole file — picking <em>## Install</em> shows just that section and its subsections.
+            Your edit is merged back into the full document on save.</li>
+          <li><kbd>Ctrl/Cmd+S</kbd> saves. With Live mode connected the file is written in place; otherwise you
+            get a save dialog or a download.</li>
+          <li>Unsaved work is kept as a draft in <code>localStorage</code>, so closing the editor won't lose it.</li>
         </ul>
 
         <h3>Comment lifecycle</h3>
@@ -1102,6 +1128,7 @@ __HEAD_ASSETS__
     editBtn: document.getElementById("edit-btn"),
     editor: document.getElementById("editor"),
     editorTextarea: document.getElementById("editor-textarea"),
+    editorScope: document.getElementById("editor-scope"),
     editorPreview: document.getElementById("editor-preview"),
     editorPreviewToggle: document.getElementById("editor-preview-toggle"),
     editorSave: document.getElementById("editor-save"),
@@ -1820,6 +1847,18 @@ __HEAD_ASSETS__
     }
   }
 
+  /**
+   * A directory handle granted read-only (or one restored from a previous
+   * session) can't be written to until the user re-grants. Query first, then
+   * prompt only if needed — this call must happen in a user gesture.
+   */
+  async function ensureWritable(handle) {
+    if (!handle.queryPermission) return true; // older implementations: just try
+    const opts = { mode: "readwrite" };
+    if ((await handle.queryPermission(opts)) === "granted") return true;
+    return (await handle.requestPermission(opts)) === "granted";
+  }
+
   // ---- Live mode (File System Access API) ----
   async function connectLive() {
     if (!("showDirectoryPicker" in window)) {
@@ -1827,7 +1866,10 @@ __HEAD_ASSETS__
       return;
     }
     try {
-      const handle = await window.showDirectoryPicker({ mode: "read", startIn: "documents" });
+      // Ask for readwrite up front: the in-app editor writes through this same
+      // handle, and a read-only handle makes the first save fail with a
+      // NotAllowedError that reads like a bug.
+      const handle = await window.showDirectoryPicker({ mode: "readwrite", startIn: "documents" });
       state.liveDirHandle = handle;
       state.liveMode = true;
       el.liveBadge.hidden = false;
@@ -1941,17 +1983,128 @@ __HEAD_ASSETS__
   // ---- In-app editor ----
   function draftKey(path) { return `marginalia.draft.${META.session_id}.${path}`; }
 
+  /**
+   * Split markdown into editable sections by heading. A section runs from its
+   * heading up to the next heading of the same or shallower level, so editing
+   * "## Install" also carries its ### subsections. Headings inside fenced code
+   * blocks are ignored. Returns line ranges [start, end).
+   */
+  function splitSections(content) {
+    const lines = content.split("\n");
+    const heads = [];
+    let inFence = false;
+    for (let i = 0; i < lines.length; i++) {
+      if (/^\s*(```|~~~)/.test(lines[i])) { inFence = !inFence; continue; }
+      if (inFence) continue;
+      const m = lines[i].match(/^(#{1,6})\s+(.*\S)\s*$/);
+      if (m) heads.push({ line: i, level: m[1].length, title: m[2] });
+    }
+
+    const sections = [];
+    // Offer a preamble entry only when it is a genuine prefix to some heading.
+    // With no headings at all it would just duplicate "Whole file".
+    if (heads.length && heads[0].line > 0 &&
+        lines.slice(0, heads[0].line).some((l) => l.trim())) {
+      sections.push({ label: "(top of file)", level: 1, start: 0, end: heads[0].line });
+    }
+    for (let h = 0; h < heads.length; h++) {
+      const head = heads[h];
+      let end = lines.length;
+      for (let n = h + 1; n < heads.length; n++) {
+        if (heads[n].level <= head.level) { end = heads[n].line; break; }
+      }
+      sections.push({
+        // Indent with U+00A0; browsers collapse ordinary leading
+        // spaces in <option> text, which would lose the hierarchy.
+        // leading spaces in <option> text, losing the indentation.
+        label: `${"\u00A0\u00A0".repeat(head.level - 1)}${head.title}`,
+        level: head.level,
+        start: head.line,
+        end,
+      });
+    }
+    return sections;
+  }
+
+  function sliceLines(content, start, end) {
+    return content.split("\n").slice(start, end).join("\n");
+  }
+
+  function spliceLines(content, start, end, replacement) {
+    const lines = content.split("\n");
+    return [...lines.slice(0, start), ...replacement.split("\n"), ...lines.slice(end)].join("\n");
+  }
+
+  /** The full document as it currently stands, with any scoped edit merged in. */
+  function composeEditorContent() {
+    const e = state.editing;
+    if (!e) return "";
+    if (!e.scope) return el.editorTextarea.value;
+    return spliceLines(e.full, e.scope.start, e.scope.end, el.editorTextarea.value);
+  }
+
+  function populateScopeSelect(content, selectedIndex) {
+    const sections = splitSections(content);
+    state.editing.sections = sections;
+    el.editorScope.innerHTML = "";
+    const whole = document.createElement("option");
+    whole.value = "-1";
+    whole.textContent = `Whole file (${content.split("\n").length} lines)`;
+    el.editorScope.appendChild(whole);
+    sections.forEach((s, i) => {
+      const o = document.createElement("option");
+      o.value = String(i);
+      o.textContent = `${s.label}  ·  ${s.end - s.start} lines`;
+      el.editorScope.appendChild(o);
+    });
+    const idx = selectedIndex != null && selectedIndex < sections.length ? selectedIndex : -1;
+    el.editorScope.value = String(idx);
+    el.editorScope.classList.toggle("scoped", idx >= 0);
+    el.editorScope.hidden = sections.length === 0;
+    return idx;
+  }
+
+  function applyScope(index) {
+    const e = state.editing;
+    if (!e) return;
+    // Fold whatever is in the textarea back into the full document first
+    e.full = composeEditorContent();
+    // Headings may have changed, so re-derive sections from the updated text
+    const idx = populateScopeSelect(e.full, index);
+    if (idx < 0) {
+      e.scope = null;
+      el.editorTextarea.value = e.full;
+    } else {
+      const s = e.sections[idx];
+      e.scope = { start: s.start, end: s.end };
+      el.editorTextarea.value = sliceLines(e.full, s.start, s.end);
+    }
+    el.editorScope.classList.toggle("scoped", idx >= 0);
+    if (!el.editorPreview.hidden) renderEditorPreview();
+    el.editorTextarea.focus();
+  }
+
+  function onScopeChange() {
+    applyScope(Number(el.editorScope.value));
+  }
+
   function openEditor() {
     if (!state.activePath) return;
     const doc = DOCS_BY_PATH.get(state.activePath);
     if (!doc) return;
-    state.editing = { path: state.activePath, original: doc.content, dirty: false };
     // Restore draft if one exists
     const draft = localStorage.getItem(draftKey(state.activePath));
-    el.editorTextarea.value = draft != null ? draft : doc.content;
-    if (draft != null && draft !== doc.content) {
-      state.editing.dirty = true;
-    }
+    const full = draft != null ? draft : doc.content;
+    state.editing = {
+      path: state.activePath,
+      original: doc.content,
+      full,
+      scope: null,
+      sections: [],
+      dirty: draft != null && draft !== doc.content,
+    };
+    el.editorTextarea.value = full;
+    populateScopeSelect(full, null);
     el.markdown.hidden = true;
     el.editor.hidden = false;
     el.editorPreview.hidden = true;
@@ -1987,10 +2140,12 @@ __HEAD_ASSETS__
 
   function onEditorInput() {
     if (!state.editing) return;
-    const val = el.editorTextarea.value;
-    state.editing.dirty = val !== state.editing.original;
+    // Always compare and persist the whole document, even when the textarea
+    // is showing a single section.
+    const full = composeEditorContent();
+    state.editing.dirty = full !== state.editing.original;
     updateEditorStatus();
-    localStorage.setItem(draftKey(state.editing.path), val);
+    localStorage.setItem(draftKey(state.editing.path), full);
     // If preview is visible, live-update it (debounced)
     if (!el.editorPreview.hidden) {
       clearTimeout(state.editorPreviewTimer);
@@ -1999,8 +2154,10 @@ __HEAD_ASSETS__
   }
 
   function renderEditorPreview() {
-    if (window.marked) el.editorPreview.innerHTML = marked.parse(el.editorTextarea.value);
-    else el.editorPreview.textContent = el.editorTextarea.value;
+    // Preview what is on screen: the section when scoped, else the whole doc.
+    const src = el.editorTextarea.value;
+    if (window.marked) el.editorPreview.innerHTML = marked.parse(src);
+    else el.editorPreview.textContent = src;
   }
 
   function togglePreview() {
@@ -2019,11 +2176,16 @@ __HEAD_ASSETS__
   async function saveEditor() {
     if (!state.editing) return;
     const path = state.editing.path;
-    const content = el.editorTextarea.value;
+    // Write the whole document, not just the section on screen
+    const content = composeEditorContent();
 
     // Try FS Access write via live-mode handle
     if (state.liveDirHandle) {
       try {
+        if (!(await ensureWritable(state.liveDirHandle))) {
+          toast("Write permission denied for the connected folder — click 🔗 to reconnect");
+          return;
+        }
         const fileHandle = await getFileHandleFromPath(state.liveDirHandle, path);
         const w = await fileHandle.createWritable();
         await w.write(content);
@@ -2070,8 +2232,18 @@ __HEAD_ASSETS__
       doc.lines = content.split("\n").length;
     }
     state.editing.original = content;
+    state.editing.full = content;
     state.editing.dirty = false;
     localStorage.removeItem(draftKey(path));
+    // Line ranges shift when a scoped edit changes the section's length
+    if (state.editing.scope) {
+      const before = Number(el.editorScope.value);
+      populateScopeSelect(content, before);
+      const s = state.editing.sections[before];
+      if (s) state.editing.scope = { start: s.start, end: s.end };
+    } else {
+      populateScopeSelect(content, null);
+    }
     updateEditorStatus();
   }
 
@@ -2161,6 +2333,7 @@ __HEAD_ASSETS__
     el.editorCancel.addEventListener("click", () => closeEditor(false));
     el.editorTextarea.addEventListener("input", onEditorInput);
     el.editorPreviewToggle.addEventListener("click", togglePreview);
+    el.editorScope.addEventListener("change", onScopeChange);
     // Tab key inserts 2 spaces instead of navigating away
     el.editorTextarea.addEventListener("keydown", (e) => {
       if (e.key === "Tab") {

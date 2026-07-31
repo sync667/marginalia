@@ -32,7 +32,8 @@ Built for reviewing large multi-document sets — design packages, ADRs, RFCs, s
 - Select any text → **💬 Add comment** popover → modal → highlight persists.
 - Comments live in `localStorage`, keyed per-project.
 - **Export** as JSON (structured for Claude) or Markdown (for humans).
-- **Live mode** — connect a docs folder via the File System Access API, page reads files directly from disk, `↻ Refresh` shows current content.
+- **Live mode** — connect a docs folder via the File System Access API, page reads files directly from disk, `↻ Refresh` shows current content, and the editor writes straight back.
+- **Edit in place, by section** — `✎ Edit` opens the markdown editor; a section dropdown lets you work on one heading at a time instead of the whole file.
 - **Save to project** — the export writes directly to a chosen folder (typically `.claude/scratchpad/`) so Claude can read it without a paste.
 - **First-run help modal** built in — new users get onboarded automatically.
 - **Cross-doc navigation** — clicking `[text](other-doc.md)` links opens that doc in-place.
