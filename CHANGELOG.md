@@ -4,6 +4,15 @@ All notable changes to Marginalia are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0]
+
+### Added
+- **Exports now carry a brief for the receiving AI agent.** Previously the export was raw data, leaving the agent to infer what it was looking at. It now includes instructions explaining that these are documentation review comments, to group them by `doc_path`, to locate passages via `quote` plus surrounding context, to act only on `open` ones, and to confirm a plan before editing any file.
+- A checkbox in the export dialog turns the brief off for a raw-data export. The choice is remembered.
+
+### Notes
+- The JSON export stays valid JSON with the brief enabled — it is an `instructions` array inside the payload, not a text preamble, so `Save to project` still writes a file an agent can parse.
+
 ## [0.1.2]
 
 ### Fixed

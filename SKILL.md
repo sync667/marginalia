@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires Python 3.9+ (stdlib only) and a local browser. Live mode and save-to-project need Chrome or Edge.
 metadata:
   author: sync667
-  version: "0.1.2"
+  version: "0.2.0"
   homepage: https://github.com/sync667/marginalia
 ---
 
@@ -90,6 +90,7 @@ The user exported to their Downloads folder (typical filename: `marginalia-comme
 
 **Then, whichever path you got it from:**
 
+- If the payload has an `instructions` field (on by default), follow it — it is the reviewer's brief for this batch. The steps below are the same thing, restated.
 - Group comments by `doc_path`.
 - Show each: quote + user's note + status (`open` / `resolved` / `dismissed`).
 - Ask what to do:

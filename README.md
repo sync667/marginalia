@@ -38,7 +38,7 @@ Built for reviewing large multi-document sets — design packages, ADRs, RFCs, s
 - Clean 3-column layout: file tree · rendered markdown · comment thread.
 - Select any text → **💬 Add comment** popover → modal → highlight persists.
 - Comments live in `localStorage`, keyed per-project.
-- **Export** as JSON (structured for Claude) or Markdown (for humans).
+- **Export** as JSON (structured for Claude) or Markdown (for humans), with an **agent brief** included by default so the receiving AI knows what the file is and how to act on it — toggleable if you just want the raw data.
 - **Live mode** — connect a docs folder via the File System Access API, page reads files directly from disk, `↻ Refresh` shows current content, and the editor writes straight back.
 - **Edit in place, by section** — `✎ Edit` opens the markdown editor; a section dropdown lets you work on one heading at a time instead of the whole file.
 - **Save to project** — the export writes directly to a chosen folder (typically `.claude/scratchpad/`) so Claude can read it without a paste.
@@ -222,6 +222,10 @@ python build.py --docs-dir /path/to/your/docs --output review.html
 
 ```json
 {
+  "instructions": [
+    "This file contains documentation review comments exported from Marginalia.",
+    "…how to act on them: group by doc_path, act only on status \"open\", confirm before editing…"
+  ],
   "schema": "doc-reviewer.v1",
   "project": "MyProject",
   "docs_dir": "docs",
