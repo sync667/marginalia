@@ -7,6 +7,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [0.1.0] — Initial public release
 
 ### Added
+- **Claude Code plugin packaging** — `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json` make the repo a self-hosting one-plugin marketplace. Install with `/plugin marketplace add sync667/marginalia` then `/plugin install marginalia@marginalia`. Still works as a plain `.claude/skills/` clone or as a standalone script.
 - Bundle any number of markdown directories into a single self-contained HTML review page (`build.py --docs-dir` repeatable, or `--auto`).
 - Reader with 3-column layout: file tree · rendered markdown · comment thread.
 - Comments: select text → floating **💬 Add comment** → modal → highlight persists in `localStorage`.

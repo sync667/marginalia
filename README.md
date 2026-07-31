@@ -7,8 +7,14 @@
 
 A Claude Code skill that turns any project's markdown documentation into a **local, self-contained web review tool**. Read all your docs in one place, highlight passages, add inline comments, edit content in-place, then hand the whole batch back to Claude to act on.
 
-**Install:** `git clone https://github.com/sync667/marginalia .claude/skills/marginalia`, then invoke `/marginalia` in Claude Code.
-See [`docs/PUBLISHING.md`](docs/PUBLISHING.md) for how this repo was set up and how to fork / republish.
+**Install** — two lines in Claude Code:
+
+```
+/plugin marketplace add sync667/marginalia
+/plugin install marginalia@marginalia
+```
+
+Then invoke `/marginalia`. See [Installation](#installation) for other routes and [`docs/PUBLISHING.md`](docs/PUBLISHING.md) for how to fork / republish.
 
 Built for reviewing large multi-document sets — design packages, ADRs, RFCs, spec batches, wiki folders — where you need to browse dozens of files, add many small notes across them, and pass the notes to an AI or teammate for follow-up.
 
@@ -35,6 +41,8 @@ Inside Claude Code, invoke:
 ```
 /marginalia
 ```
+
+…or just ask in plain language — "review my docs", "let me comment on the specs", "open `wiki/` so I can annotate it". Claude also offers Marginalia on its own when you're working across a larger set of markdown files (say, right after it drafts a batch of specs) — it suggests, you decide.
 
 Claude will scan `docs/` (or whatever directory you name), generate a self-contained HTML file at `.claude/scratchpad/marginalia.html`, and open it in your default browser.
 
@@ -76,39 +84,75 @@ Requires Chrome or Edge (File System Access API). In Firefox / Safari the button
 ## Requirements
 
 - **Python 3.9+** on your machine (for the build script — stdlib only, no `pip install`).
+- **Claude Code v2.1.142+** for the one-line plugin install. Older versions: use the plain-skill clone below.
 - A modern browser (Chrome / Edge / Safari / Firefox recent).
 - Internet on **first open** — the app loads `marked` and `highlight.js` from cdnjs. Browser caches them after.
 - For fully offline HTML: pass `--offline` to `build.py`. First offline build fetches the two libs into `vendor/`; subsequent builds inline from cache. No network needed at open time after that.
 
 ## Installation
 
-### Per-project (recommended for teams)
+### As a Claude Code plugin (recommended)
 
-Copy the `marginalia/` folder into your project at `.claude/skills/`:
-
-```
-your-project/
-└── .claude/
-    └── skills/
-        └── marginalia/
-            ├── SKILL.md
-            ├── build.py
-            ├── template.html
-            ├── vendor/         # created on first --offline build
-            └── README.md
-```
-
-Claude Code auto-discovers project skills.
-
-### Global (recommended for personal use across many projects)
-
-Copy to your user-level skills directory:
+Marginalia ships as a one-plugin marketplace. Inside Claude Code:
 
 ```
-~/.claude/skills/marginalia/
+/plugin marketplace add sync667/marginalia
+/plugin install marginalia@marginalia
 ```
 
-Available in every project you open with Claude Code.
+Or from your shell:
+
+```bash
+claude plugin marketplace add sync667/marginalia
+claude plugin install marginalia@marginalia
+```
+
+Claude Code clones the repo into its plugin cache, registers the skill, and keeps it up to date via `/plugin update marginalia`. Verify with `claude plugin list` — you should see `marginalia@marginalia · enabled`.
+
+To pin the plugin for everyone on a project, commit this to `.claude/settings.json` instead — teammates get prompted to install on first run:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "marginalia": {
+      "source": { "source": "github", "repo": "sync667/marginalia" }
+    }
+  },
+  "enabledPlugins": { "marginalia@marginalia": true }
+}
+```
+
+### As a plain skill (no plugin system)
+
+Clone straight into a skills directory — works in Claude Code and in any other agent that reads `SKILL.md` files:
+
+```bash
+# personal, available in every project
+git clone https://github.com/sync667/marginalia ~/.claude/skills/marginalia
+
+# or per-project, checked in with the repo
+git clone https://github.com/sync667/marginalia .claude/skills/marginalia
+```
+
+Layout after cloning:
+
+```
+.claude/skills/marginalia/
+├── SKILL.md          # what Claude reads
+├── build.py          # the generator (stdlib Python only)
+├── template.html     # the review app
+├── .claude-plugin/   # manifest — makes it load as a plugin too
+└── vendor/           # created on first --offline build
+```
+
+### Standalone (no agent at all)
+
+The generator is a plain script. Clone anywhere and run it:
+
+```bash
+git clone https://github.com/sync667/marginalia && cd marginalia
+python build.py --docs-dir /path/to/your/docs --output review.html
+```
 
 ## build.py options
 
@@ -121,7 +165,8 @@ Available in every project you open with Claude Code.
 --project-name NAME  Shown in the app header. Default: cwd basename.
 --offline            Inline marked + highlight.js. First run fetches them from cdnjs
                      into vendor/; subsequent runs reuse the cache.
---vendor-dir PATH    Cache location for --offline (default: next to build.py).
+--vendor-dir PATH    Cache location for --offline. Default: $CLAUDE_PLUGIN_DATA/vendor
+                     when installed as a plugin (survives updates), else next to build.py.
 --no-open            Skip auto-opening the browser.
 ```
 

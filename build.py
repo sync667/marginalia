@@ -63,6 +63,20 @@ AUTO_SKIP_DIRS = {
 }
 
 
+def default_vendor_dir() -> Path:
+    """Where to cache the offline libs.
+
+    When Marginalia runs as an installed Claude Code plugin, the plugin
+    directory is a cache that gets replaced on update, so the vendor files
+    go to the persistent plugin data dir instead. Standalone checkouts keep
+    using `vendor/` next to this script.
+    """
+    plugin_data = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if plugin_data:
+        return Path(plugin_data) / "vendor"
+    return Path(__file__).parent / "vendor"
+
+
 def fetch_vendor(vendor_dir: Path) -> dict[str, str]:
     """Fetch vendor files if not already cached. Returns filename -> content map.
 
@@ -322,7 +336,8 @@ def main() -> int:
     parser.add_argument(
         "--vendor-dir",
         default=None,
-        help="Where to cache vendored libs (default: next to build.py).",
+        help="Where to cache vendored libs (default: $CLAUDE_PLUGIN_DATA/vendor when "
+             "running as an installed plugin, else next to build.py).",
     )
     args = parser.parse_args()
 
@@ -345,7 +360,7 @@ def main() -> int:
 
     output = Path(args.output).resolve()
     project_name = args.project_name or project_root.name
-    vendor_dir = Path(args.vendor_dir).resolve() if args.vendor_dir else Path(__file__).parent / "vendor"
+    vendor_dir = Path(args.vendor_dir).resolve() if args.vendor_dir else default_vendor_dir()
 
     count, lines, session_id = build(
         docs_dirs=docs_dirs,

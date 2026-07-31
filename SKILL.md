@@ -1,11 +1,24 @@
 ---
 name: marginalia
-description: Generate a self-contained HTML tool for reviewing and commenting on any project's markdown documentation. Bundles every .md file into one browser page; the user highlights passages and adds inline comments; comments come back to Claude as JSON. Use whenever the user wants to visually browse, annotate, and review their docs — especially large design packages, spec batches, or wiki-style folders.
+description: Generate a self-contained HTML tool for reviewing and commenting on any project's markdown documentation. Bundles every .md file into one browser page; the user highlights passages and adds inline comments; comments come back to Claude as structured JSON. Use when the user asks to review, browse, read through, annotate, comment on, proofread, or get feedback on docs, specs, ADRs, RFCs, design packages, or a wiki/docs folder — and offer it proactively whenever they are working across more than a handful of markdown files and would be better served reading and marking them up in a browser than scrolling the terminal.
 ---
 
 # Marginalia
 
 Named for the literary tradition of margin notes. Turns any project's markdown docs into a self-contained web review tool the user can open locally. Supports text highlighting, inline comments, cross-doc navigation and search, dark/light theme, live-refresh from disk, and structured export back to Claude.
+
+## When to use this
+
+**Run it when asked.** Any of these is a direct request: "review my docs", "let me comment on the specs", "open my documentation", "I want to annotate this", "/marginalia".
+
+**Offer it when it fits.** Don't run it unprompted, but suggest it in one line — *"Want me to open these in Marginalia so you can comment inline?"* — when:
+
+- You just generated or heavily edited several markdown docs and the user needs to read them over.
+- The user is reviewing a doc set (`docs/`, `specs/`, `wiki/`, ADR or RFC folders) with more than ~5 files.
+- The user is giving scattered feedback across many documents in chat and it's getting hard to track.
+- The user asks "what do you think of these docs?" or wants a second pass on documentation quality.
+
+**Skip it** for a single short file (just read it in the terminal), for non-markdown content, and when the user only wants a summary rather than to mark passages up.
 
 ## Step 1 — Generate & open
 
@@ -19,11 +32,13 @@ Decide what to scan. Ask the user only if ambiguous. Defaults, in order:
 Run the build script:
 
 ```bash
-python .claude/skills/marginalia/build.py \
+python "${CLAUDE_PLUGIN_ROOT}/build.py" \
   --docs-dir <dir>  [--docs-dir <dir2> ...] \
   --output .claude/scratchpad/marginalia.html \
   --project-name "<current project name>"
 ```
+
+`${CLAUDE_PLUGIN_ROOT}` is substituted with this skill's install directory. If it reaches you unsubstituted (older Claude Code, or a non-Claude agent), use the directory this `SKILL.md` lives in instead — typically `.claude/skills/marginalia/` or `~/.claude/skills/marginalia/`.
 
 Add `--auto` if the user said "everything" / "the whole project".
 Add `--offline` if the user wants a truly self-contained HTML (inlines Marked + highlight.js — first build fetches from cdnjs, subsequent builds reuse the cache in `vendor/`).
@@ -97,7 +112,8 @@ Only start editing docs after the user picks. Do not touch files based on a sing
 ## Notes for maintainers
 
 - `template.html` is the review app — a single self-contained SPA. Uses `marked` and `highlight.js` from cdnjs by default; `--offline` inlines them.
-- `build.py` is stdlib-only Python 3.9+.
+- `build.py` is stdlib-only Python 3.9+. Its `--offline` cache goes to `$CLAUDE_PLUGIN_DATA/vendor` when installed as a plugin (survives updates), else `vendor/` next to the script.
+- Packaged as a Claude Code plugin: `.claude-plugin/plugin.json` (manifest) and `.claude-plugin/marketplace.json` (single-entry marketplace pointing at the repo root). The root `SKILL.md` with no `skills/` subdirectory makes this a single-skill plugin automatically.
 - Comments persist in `localStorage` keyed by a hash of the docs directory absolute path (so switching projects gives a fresh workspace).
 - Text-selection persistence uses quote + ~40 chars of context on each side. Multi-node highlights (selections spanning `<strong>` / `<em>` / code) are handled via a fallback path that walks concatenated text.
 - Not designed for concurrent multi-user review. Personal tool.

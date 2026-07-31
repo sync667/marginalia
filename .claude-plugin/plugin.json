@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "marginalia",
+  "displayName": "Marginalia",
+  "version": "0.1.0",
+  "description": "Turn any project's markdown docs into a self-contained web review tool — highlight passages, add inline comments, hand the batch back to Claude.",
+  "author": {
+    "name": "sync667",
+    "url": "https://github.com/sync667"
+  },
+  "homepage": "https://github.com/sync667/marginalia#readme",
+  "repository": "https://github.com/sync667/marginalia",
+  "license": "MIT",
+  "keywords": [
+    "markdown",
+    "documentation",
+    "review",
+    "annotations",
+    "comments",
+    "docs"
+  ]
+}

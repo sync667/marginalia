@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "marginalia",
+  "description": "Marginalia — read, annotate, and review any project's markdown docs in a self-contained web tool.",
+  "owner": {
+    "name": "sync667",
+    "url": "https://github.com/sync667"
+  },
+  "plugins": [
+    {
+      "name": "marginalia",
+      "source": "./",
+      "displayName": "Marginalia",
+      "description": "Turn any project's markdown docs into a self-contained web review tool — highlight passages, add inline comments, hand the batch back to Claude.",
+      "version": "0.1.0",
+      "author": {
+        "name": "sync667",
+        "url": "https://github.com/sync667"
+      },
+      "homepage": "https://github.com/sync667/marginalia#readme",
+      "repository": "https://github.com/sync667/marginalia",
+      "license": "MIT",
+      "category": "documentation",
+      "keywords": [
+        "markdown",
+        "documentation",
+        "review",
+        "annotations",
+        "comments",
+        "docs"
+      ],
+      "tags": [
+        "markdown",
+        "docs-review",
+        "annotations",
+        "self-contained",
+        "local-first"
+      ]
+    }
+  ]
+}
