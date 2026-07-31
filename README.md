@@ -5,7 +5,7 @@
 
 > _mar·gi·na·lia_ · marginal notes; annotations written in the margins of a manuscript.
 
-A Claude Code skill that turns any project's markdown documentation into a **local, self-contained web review tool**. Read all your docs in one place, highlight passages, add inline comments, edit content in-place, then hand the whole batch back to Claude to act on.
+An [Agent Skill](https://agentskills.io/specification) that turns any project's markdown documentation into a **local, self-contained web review tool**. Read all your docs in one place, highlight passages, add inline comments, edit content in-place, then hand the whole batch back to Claude to act on.
 
 **Install** — two lines in Claude Code:
 
@@ -14,7 +14,7 @@ A Claude Code skill that turns any project's markdown documentation into a **loc
 /plugin install marginalia@marginalia
 ```
 
-Then invoke `/marginalia`. See [Installation](#installation) for other routes and [`docs/PUBLISHING.md`](docs/PUBLISHING.md) for how to fork / republish.
+Then invoke `/marginalia`. Not on Claude? See [Installation](#installation) — Marginalia is a standard [Agent Skill](https://agentskills.io/specification), so it also runs in Devin, Codex, Cursor, Copilot, and anything else that reads `SKILL.md`.
 
 Built for reviewing large multi-document sets — design packages, ADRs, RFCs, spec batches, wiki folders — where you need to browse dozens of files, add many small notes across them, and pass the notes to an AI or teammate for follow-up.
 
@@ -84,7 +84,7 @@ Requires Chrome or Edge (File System Access API). In Firefox / Safari the button
 ## Requirements
 
 - **Python 3.9+** on your machine (for the build script — stdlib only, no `pip install`).
-- **Claude Code v2.1.142+** for the one-line plugin install. Older versions: use the plain-skill clone below.
+- An agent that reads `SKILL.md` — Claude Code (v2.1.142+ for the plugin install), Devin, Codex, Cursor, Copilot, and others. Or none at all: `build.py` runs standalone.
 - A modern browser (Chrome / Edge / Safari / Firefox recent).
 - Internet on **first open** — the app loads `marked` and `highlight.js` from cdnjs. Browser caches them after.
 - For fully offline HTML: pass `--offline` to `build.py`. First offline build fetches the two libs into `vendor/`; subsequent builds inline from cache. No network needed at open time after that.
@@ -122,28 +122,37 @@ To pin the plugin for everyone on a project, commit this to `.claude/settings.js
 }
 ```
 
-### As a plain skill (no plugin system)
+### Any other agent (Devin, Codex, Cursor, Copilot, …)
 
-Clone straight into a skills directory — works in Claude Code and in any other agent that reads `SKILL.md` files:
+Marginalia is a plain [Agent Skill](https://agentskills.io/specification) — a `SKILL.md` at the repo root — so it installs into any agent that speaks the standard. Easiest route is the [`skills`](https://github.com/vercel-labs/skills) CLI, which knows the install path for 75+ agents:
 
 ```bash
-# personal, available in every project
-git clone https://github.com/sync667/marginalia ~/.claude/skills/marginalia
-
-# or per-project, checked in with the repo
-git clone https://github.com/sync667/marginalia .claude/skills/marginalia
+npx skills add sync667/marginalia
 ```
+
+It detects the agents on your machine and drops the skill in the right place. Or clone it yourself:
+
+```bash
+git clone https://github.com/sync667/marginalia .agents/skills/marginalia     # cross-agent standard
+git clone https://github.com/sync667/marginalia .devin/skills/marginalia      # Devin CLI
+git clone https://github.com/sync667/marginalia ~/.claude/skills/marginalia   # Claude Code, global
+git clone https://github.com/sync667/marginalia .claude/skills/marginalia     # Claude Code, per-project
+```
+
+Known-good skill directories: `.agents/skills/` (Codex, cross-agent), `.devin/skills/` and `~/.config/devin/skills/` (Devin), `.windsurf/skills/`, `.cursor/skills/`, `.github/skills/` (Copilot), `.claude/skills/`.
 
 Layout after cloning:
 
 ```
-.claude/skills/marginalia/
-├── SKILL.md          # what Claude reads
+<skills-dir>/marginalia/
+├── SKILL.md          # what the agent reads
 ├── build.py          # the generator (stdlib Python only)
 ├── template.html     # the review app
-├── .claude-plugin/   # manifest — makes it load as a plugin too
+├── .claude-plugin/   # manifest — makes it load as a Claude plugin too
 └── vendor/           # created on first --offline build
 ```
+
+The directory must be named `marginalia` to match the `name:` in the frontmatter, per the spec.
 
 ### Standalone (no agent at all)
 

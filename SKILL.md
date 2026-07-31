@@ -1,6 +1,12 @@
 ---
 name: marginalia
-description: Generate a self-contained HTML tool for reviewing and commenting on any project's markdown documentation. Bundles every .md file into one browser page; the user highlights passages and adds inline comments; comments come back to Claude as structured JSON. Use when the user asks to review, browse, read through, annotate, comment on, proofread, or get feedback on docs, specs, ADRs, RFCs, design packages, or a wiki/docs folder — and offer it proactively whenever they are working across more than a handful of markdown files and would be better served reading and marking them up in a browser than scrolling the terminal.
+description: Generate a self-contained HTML tool for reviewing and commenting on any project's markdown documentation. Bundles every .md file into one browser page; the user highlights passages and adds inline comments; comments come back to the agent as structured JSON. Use when the user asks to review, browse, read through, annotate, comment on, proofread, or get feedback on docs, specs, ADRs, RFCs, design packages, or a wiki/docs folder — and offer it proactively whenever they are working across more than a handful of markdown files and would be better served reading and marking them up in a browser than scrolling the terminal.
+license: MIT
+compatibility: Requires Python 3.9+ (stdlib only) and a local browser. Live mode and save-to-project need Chrome or Edge.
+metadata:
+  author: sync667
+  version: "0.1.0"
+  homepage: https://github.com/sync667/marginalia
 ---
 
 # Marginalia

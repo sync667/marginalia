@@ -18,9 +18,7 @@ marginalia/
 ├── LICENSE
 ├── CHANGELOG.md
 ├── .gitignore
-├── .github/workflows/ci.yml
-└── docs/
-    └── PUBLISHING.md
+└── .github/workflows/ci.yml
 ```
 
 `SKILL.md` sits at the repo root with no `skills/` subdirectory, which is what makes this load as a single-skill plugin. Don't move it.
@@ -64,5 +62,5 @@ Include:
 - Match existing code style (vanilla JS, no build step, small deps).
 - If you add a UI element, add it to `README.md` and to the in-app help modal.
 - If you change the export JSON schema, bump the `schema` field in `template.html` and note it in `CHANGELOG.md`.
-- Releases pin a version: bump `version` in **both** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, or users won't receive the update. See [`docs/PUBLISHING.md`](docs/PUBLISHING.md).
+- Releases pin a version: bump `version` in **both** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` (and `metadata.version` in `SKILL.md`), or Claude Code users won't receive the update.
 - Test in Chrome + Firefox at minimum. Report if a feature is Chrome-only (e.g. File System Access API).

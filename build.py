@@ -157,7 +157,7 @@ def scan_docs(docs_dirs: list[Path], project_root: Path) -> list[dict]:
 def auto_discover(project_root: Path) -> list[Path]:
     """Return [project_root] if it contains any .md files at all (after
     skipping AUTO_SKIP_DIRS)."""
-    for dirpath, dirnames, filenames in os.walk(project_root):
+    for _dirpath, dirnames, filenames in os.walk(project_root):
         dirnames[:] = [d for d in dirnames if d not in AUTO_SKIP_DIRS and not d.startswith(".")]
         if any(f.endswith(".md") for f in filenames):
             return [project_root]
