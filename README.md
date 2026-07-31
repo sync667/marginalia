@@ -91,7 +91,8 @@ Requires Chrome or Edge (File System Access API). In Firefox / Safari the button
 - `Ctrl/Cmd+K` — focus search
 - `Ctrl/Cmd+S` — open export dialog
 - `Ctrl/Cmd+R` — refresh (Live mode only; otherwise normal browser reload)
-- `?` — open the help modal
+- `Ctrl/Cmd+/` — open the help modal (works even while typing)
+- `?` — open the help modal (only when focus isn't in a text field, so you can still type a `?`)
 - `Esc` — close a modal / dismiss the popover
 - `Ctrl/Cmd+Enter` — save comment (inside the comment modal)
 

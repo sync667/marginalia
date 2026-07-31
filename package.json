@@ -1,6 +1,6 @@
 {
   "name": "@sync667/marginalia",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Turn any project's markdown docs into a self-contained web review tool — highlight passages, add inline comments, hand the batch back to your AI agent as structured JSON.",
   "keywords": [
     "markdown",

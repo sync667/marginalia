@@ -4,6 +4,15 @@ All notable changes to Marginalia are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2]
+
+### Fixed
+- **A `?` typed into a comment opened the help modal instead of inserting the character.** The keyboard handler treated focus inside the app's own modals as "not typing", so the bare `?` shortcut fired while writing a comment. The typing guard now covers inputs, textareas, selects and contenteditable everywhere, including modals.
+- `Ctrl/Cmd+E` no longer toggles the document editor while the comment modal is open.
+
+### Added
+- `Ctrl/Cmd+/` opens help. Unlike `?` it works while typing, so help stays reachable from any field.
+
 ## [0.1.1]
 
 No functional change — `build.py`, `template.html`, `SKILL.md` and the npm wrapper are identical to 0.1.0.

@@ -983,8 +983,10 @@ __HEAD_ASSETS__
           <span>Open export dialog</span>
           <span class="kbd-group"><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span>+<span class="kbd">R</span></span>
           <span>Refresh docs (in Live mode)</span>
+          <span class="kbd-group"><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span>+<span class="kbd">/</span></span>
+          <span>Open this help (works while typing)</span>
           <span class="kbd-group"><span class="kbd">?</span></span>
-          <span>Open this help</span>
+          <span>Open this help (when not typing in a field)</span>
           <span class="kbd-group"><span class="kbd">Esc</span></span>
           <span>Close modal / dismiss popover</span>
           <span class="kbd-group"><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span>+<span class="kbd">Enter</span></span>
@@ -2365,9 +2367,14 @@ __HEAD_ASSETS__
     });
 
     document.addEventListener("keydown", (e) => {
-      // Don't hijack shortcuts when typing in inputs/textareas (except our own modal)
-      const isTyping = e.target && ["INPUT", "TEXTAREA"].includes(e.target.tagName)
-        && !el.modalBackdrop.contains(e.target);
+      // Don't hijack bare-character shortcuts while the user is typing. This
+      // deliberately includes our own modals: a comment must be able to contain
+      // a "?". Modifier combos (Escape, Ctrl+Enter, Ctrl+/) are handled below
+      // and are unaffected by this flag.
+      const t = e.target;
+      const isTyping = !!t && (
+        ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName) || t.isContentEditable === true
+      );
 
       if (e.key === "Escape") {
         if (!el.modalBackdrop.hidden) closeModal();
@@ -2384,7 +2391,13 @@ __HEAD_ASSETS__
         e.preventDefault();
         if (state.editing) saveEditor();
         else openExport();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "/") {
+        // Works everywhere, including inside a comment box, because "?" alone
+        // must stay typeable.
+        e.preventDefault();
+        if (el.helpBackdrop.hidden) openHelp(); else closeHelp();
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
+        if (!el.modalBackdrop.hidden) return; // don't toggle the doc editor mid-comment
         e.preventDefault();
         if (state.editing) closeEditor(false);
         else openEditor();

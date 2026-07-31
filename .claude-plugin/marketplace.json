@@ -12,7 +12,7 @@
       "source": "./",
       "displayName": "Marginalia",
       "description": "Turn any project's markdown docs into a self-contained web review tool — highlight passages, add inline comments, hand the batch back to Claude.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "sync667",
         "url": "https://github.com/sync667"
