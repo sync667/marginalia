@@ -19,15 +19,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Deliberately no registry-url: it makes setup-node write an .npmrc with
+      # _authToken=${NODE_AUTH_TOKEN} and export that variable. A present-but-
+      # empty token is still a value, and npm would use it instead of falling
+      # back to OIDC. npm defaults to registry.npmjs.org anyway.
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          registry-url: "https://registry.npmjs.org"
+          node-version: "22"
 
-      # Trusted publishing needs a recent npm CLI; the one bundled with Node 20
-      # predates OIDC support.
+      # Trusted publishing needs a recent npm CLI; the one bundled with Node
+      # predates OIDC support. npm 12 requires Node >= 22.22, hence the bump above.
       - name: Upgrade npm
         run: npm install -g npm@latest
+
+      - name: Show toolchain
+        run: |
+          node --version
+          npm --version
+          echo "NODE_AUTH_TOKEN is ${NODE_AUTH_TOKEN:+SET (bad — breaks OIDC)}${NODE_AUTH_TOKEN:-unset (good)}"
 
       - name: Refuse to publish if the tag and package.json disagree
         if: github.event_name == 'release'
