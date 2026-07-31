@@ -4,6 +4,13 @@ All notable changes to Marginalia are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1]
+
+No functional change — `build.py`, `template.html`, `SKILL.md` and the npm wrapper are identical to 0.1.0.
+
+### Changed
+- Release engineering only: publishing now runs through the `publish` workflow using npm trusted publishing (OIDC), so releases are cut from CI with no long-lived `NPM_TOKEN`. 0.1.0 was published by hand; this version exercises the automated path end to end and ships with a provenance attestation.
+
 ## [0.1.0] — Initial public release
 
 ### Fixed

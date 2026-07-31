@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires Python 3.9+ (stdlib only) and a local browser. Live mode and save-to-project need Chrome or Edge.
 metadata:
   author: sync667
-  version: "0.1.0"
+  version: "0.1.1"
   homepage: https://github.com/sync667/marginalia
 ---
 
